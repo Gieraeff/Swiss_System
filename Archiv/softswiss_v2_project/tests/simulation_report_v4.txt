@@ -1,0 +1,8 @@
+Simulation summary (offline smoke test)
+- UI compiles without syntax errors.
+- Player display preview now shows 2 next matches.
+- Player ranking shows all 24 teams.
+- KO / podium remains hidden until KO phase.
+- Backup manager records a visible last-save timestamp.
+- Admin view includes a current pairing overview.
+- Strict Swiss can still require one relaxed refill near the end; this matched the intended manual fallback behavior.

@@ -1,0 +1,17 @@
+Simulation erfolgreich
+Durchläufe: 12
+Ø manuelle Relaxed-Suchen: 2.25
+Max manuelle Relaxed-Suchen: 4
+Beispiel Top 8:
+  1. Team 17
+  2. Team 12
+  3. Team 08
+  4. Team 10
+  5. Team 11
+  6. Team 19
+  7. Team 15
+  8. Team 06
+Beispiel Podest:
+  1. Team 08
+  2. Team 11
+  3. Team 17

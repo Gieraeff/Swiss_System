@@ -1,0 +1,701 @@
+{
+  "phase": "SWISS",
+  "started_at": 1777889914.525934,
+  "match_counter": 17,
+  "teams": [
+    {
+      "id": 1,
+      "name": "Team 01",
+      "seed": 1,
+      "swiss_points": 0,
+      "cups_metric": -3,
+      "swiss_games_played": 1,
+      "opponents": [
+        2
+      ],
+      "last_finish_ts": 1777889997.9335582,
+      "active_match_id": "SW-014",
+      "ko_seed": null,
+      "next_up_plan": [],
+      "next_up_updated_ts": 0.0
+    },
+    {
+      "id": 2,
+      "name": "Team 02",
+      "seed": 2,
+      "swiss_points": 3,
+      "cups_metric": 3,
+      "swiss_games_played": 1,
+      "opponents": [
+        1
+      ],
+      "last_finish_ts": 1777889997.9335582,
+      "active_match_id": "SW-013",
+      "ko_seed": null,
+      "next_up_plan": [],
+      "next_up_updated_ts": 0.0
+    },
+    {
+      "id": 3,
+      "name": "Team 03",
+      "seed": 3,
+      "swiss_points": 3,
+      "cups_metric": 3,
+      "swiss_games_played": 1,
+      "opponents": [
+        5
+      ],
+      "last_finish_ts": 1777890009.6454492,
+      "active_match_id": "SW-013",
+      "ko_seed": null,
+      "next_up_plan": [],
+      "next_up_updated_ts": 0.0
+    },
+    {
+      "id": 4,
+      "name": "Team 04",
+      "seed": 4,
+      "swiss_points": 0,
+      "cups_metric": -5,
+      "swiss_games_played": 1,
+      "opponents": [
+        6
+      ],
+      "last_finish_ts": 1777890014.8534918,
+      "active_match_id": "SW-015",
+      "ko_seed": null,
+      "next_up_plan": [],
+      "next_up_updated_ts": 0.0
+    },
+    {
+      "id": 5,
+      "name": "Team 05",
+      "seed": 5,
+      "swiss_points": 0,
+      "cups_metric": -3,
+      "swiss_games_played": 1,
+      "opponents": [
+        3
+      ],
+      "last_finish_ts": 1777890009.6454492,
+      "active_match_id": "SW-014",
+      "ko_seed": null,
+      "next_up_plan": [],
+      "next_up_updated_ts": 0.0
+    },
+    {
+      "id": 6,
+      "name": "Team 06",
+      "seed": 6,
+      "swiss_points": 3,
+      "cups_metric": 5,
+      "swiss_games_played": 1,
+      "opponents": [
+        4
+      ],
+      "last_finish_ts": 1777890014.8534918,
+      "active_match_id": "SW-016",
+      "ko_seed": null,
+      "next_up_plan": [],
+      "next_up_updated_ts": 0.0
+    },
+    {
+      "id": 7,
+      "name": "Team 07",
+      "seed": 7,
+      "swiss_points": 3,
+      "cups_metric": 4,
+      "swiss_games_played": 1,
+      "opponents": [
+        8
+      ],
+      "last_finish_ts": 1777890030.981635,
+      "active_match_id": null,
+      "ko_seed": null,
+      "next_up_plan": [],
+      "next_up_updated_ts": 0.0
+    },
+    {
+      "id": 8,
+      "name": "Team 08",
+      "seed": 8,
+      "swiss_points": 0,
+      "cups_metric": -4,
+      "swiss_games_played": 1,
+      "opponents": [
+        7
+      ],
+      "last_finish_ts": 1777890030.981635,
+      "active_match_id": null,
+      "ko_seed": null,
+      "next_up_plan": [],
+      "next_up_updated_ts": 0.0
+    },
+    {
+      "id": 9,
+      "name": "Team 09",
+      "seed": 9,
+      "swiss_points": 0,
+      "cups_metric": -2,
+      "swiss_games_played": 1,
+      "opponents": [
+        10
+      ],
+      "last_finish_ts": 1777890026.006042,
+      "active_match_id": "SW-015",
+      "ko_seed": null,
+      "next_up_plan": [],
+      "next_up_updated_ts": 0.0
+    },
+    {
+      "id": 10,
+      "name": "Team 10",
+      "seed": 10,
+      "swiss_points": 3,
+      "cups_metric": 2,
+      "swiss_games_played": 1,
+      "opponents": [
+        9
+      ],
+      "last_finish_ts": 1777890026.006042,
+      "active_match_id": "SW-016",
+      "ko_seed": null,
+      "next_up_plan": [],
+      "next_up_updated_ts": 0.0
+    },
+    {
+      "id": 11,
+      "name": "Team 11",
+      "seed": 11,
+      "swiss_points": 3,
+      "cups_metric": 1,
+      "swiss_games_played": 1,
+      "opponents": [
+        12
+      ],
+      "last_finish_ts": 1777890043.9896452,
+      "active_match_id": null,
+      "ko_seed": null,
+      "next_up_plan": [],
+      "next_up_updated_ts": 0.0
+    },
+    {
+      "id": 12,
+      "name": "Team 12",
+      "seed": 12,
+      "swiss_points": 0,
+      "cups_metric": -1,
+      "swiss_games_played": 1,
+      "opponents": [
+        11
+      ],
+      "last_finish_ts": 1777890043.9896452,
+      "active_match_id": null,
+      "ko_seed": null,
+      "next_up_plan": [],
+      "next_up_updated_ts": 0.0
+    },
+    {
+      "id": 13,
+      "name": "Team 13",
+      "seed": 13,
+      "swiss_points": 0,
+      "cups_metric": -1,
+      "swiss_games_played": 1,
+      "opponents": [
+        14
+      ],
+      "last_finish_ts": 1777890050.1814382,
+      "active_match_id": null,
+      "ko_seed": null,
+      "next_up_plan": [],
+      "next_up_updated_ts": 0.0
+    },
+    {
+      "id": 14,
+      "name": "Team 14",
+      "seed": 14,
+      "swiss_points": 3,
+      "cups_metric": 1,
+      "swiss_games_played": 1,
+      "opponents": [
+        13
+      ],
+      "last_finish_ts": 1777890050.1814382,
+      "active_match_id": null,
+      "ko_seed": null,
+      "next_up_plan": [],
+      "next_up_updated_ts": 0.0
+    },
+    {
+      "id": 15,
+      "name": "Team 15",
+      "seed": 15,
+      "swiss_points": 2,
+      "cups_metric": 2,
+      "swiss_games_played": 1,
+      "opponents": [
+        16
+      ],
+      "last_finish_ts": 1777890037.2135482,
+      "active_match_id": null,
+      "ko_seed": null,
+      "next_up_plan": [],
+      "next_up_updated_ts": 0.0
+    },
+    {
+      "id": 16,
+      "name": "Team 16",
+      "seed": 16,
+      "swiss_points": 1,
+      "cups_metric": 0,
+      "swiss_games_played": 1,
+      "opponents": [
+        15
+      ],
+      "last_finish_ts": 1777890037.2135482,
+      "active_match_id": null,
+      "ko_seed": null,
+      "next_up_plan": [],
+      "next_up_updated_ts": 0.0
+    },
+    {
+      "id": 17,
+      "name": "Team 17",
+      "seed": 17,
+      "swiss_points": 3,
+      "cups_metric": 1,
+      "swiss_games_played": 1,
+      "opponents": [
+        18
+      ],
+      "last_finish_ts": 1777890079.3894503,
+      "active_match_id": null,
+      "ko_seed": null,
+      "next_up_plan": [],
+      "next_up_updated_ts": 0.0
+    },
+    {
+      "id": 18,
+      "name": "Team 18",
+      "seed": 18,
+      "swiss_points": 0,
+      "cups_metric": -1,
+      "swiss_games_played": 1,
+      "opponents": [
+        17
+      ],
+      "last_finish_ts": 1777890079.3894503,
+      "active_match_id": null,
+      "ko_seed": null,
+      "next_up_plan": [],
+      "next_up_updated_ts": 0.0
+    },
+    {
+      "id": 19,
+      "name": "Team 19",
+      "seed": 19,
+      "swiss_points": 3,
+      "cups_metric": 3,
+      "swiss_games_played": 1,
+      "opponents": [
+        20
+      ],
+      "last_finish_ts": 1777890066.2861578,
+      "active_match_id": null,
+      "ko_seed": null,
+      "next_up_plan": [],
+      "next_up_updated_ts": 0.0
+    },
+    {
+      "id": 20,
+      "name": "Team 20",
+      "seed": 20,
+      "swiss_points": 0,
+      "cups_metric": -3,
+      "swiss_games_played": 1,
+      "opponents": [
+        19
+      ],
+      "last_finish_ts": 1777890066.2861578,
+      "active_match_id": null,
+      "ko_seed": null,
+      "next_up_plan": [],
+      "next_up_updated_ts": 0.0
+    },
+    {
+      "id": 21,
+      "name": "Team 21",
+      "seed": 21,
+      "swiss_points": 3,
+      "cups_metric": 3,
+      "swiss_games_played": 1,
+      "opponents": [
+        22
+      ],
+      "last_finish_ts": 1777890075.0695634,
+      "active_match_id": null,
+      "ko_seed": null,
+      "next_up_plan": [],
+      "next_up_updated_ts": 0.0
+    },
+    {
+      "id": 22,
+      "name": "Team 22",
+      "seed": 22,
+      "swiss_points": 0,
+      "cups_metric": -3,
+      "swiss_games_played": 1,
+      "opponents": [
+        21
+      ],
+      "last_finish_ts": 1777890075.0695634,
+      "active_match_id": null,
+      "ko_seed": null,
+      "next_up_plan": [],
+      "next_up_updated_ts": 0.0
+    },
+    {
+      "id": 23,
+      "name": "Team 23",
+      "seed": 23,
+      "swiss_points": 3,
+      "cups_metric": 4,
+      "swiss_games_played": 1,
+      "opponents": [
+        24
+      ],
+      "last_finish_ts": 1777890057.3015666,
+      "active_match_id": null,
+      "ko_seed": null,
+      "next_up_plan": [],
+      "next_up_updated_ts": 0.0
+    },
+    {
+      "id": 24,
+      "name": "Team 24",
+      "seed": 24,
+      "swiss_points": 0,
+      "cups_metric": -4,
+      "swiss_games_played": 1,
+      "opponents": [
+        23
+      ],
+      "last_finish_ts": 1777890057.3015666,
+      "active_match_id": null,
+      "ko_seed": null,
+      "next_up_plan": [],
+      "next_up_updated_ts": 0.0
+    }
+  ],
+  "active_matches": {
+    "3": {
+      "match_id": "SW-013",
+      "phase": "SWISS",
+      "slot_label": "Swiss",
+      "table": 3,
+      "team_a": 2,
+      "team_b": 3,
+      "status": "active",
+      "winner": null,
+      "loser": null,
+      "is_overtime": false,
+      "loser_cups_hit": null,
+      "started_ts": 1777890057.302646,
+      "ended_ts": null,
+      "point_cap_used": 2,
+      "game_cap_used": 1
+    },
+    "1": {
+      "match_id": "SW-014",
+      "phase": "SWISS",
+      "slot_label": "Swiss",
+      "table": 1,
+      "team_a": 1,
+      "team_b": 5,
+      "status": "active",
+      "winner": null,
+      "loser": null,
+      "is_overtime": false,
+      "loser_cups_hit": null,
+      "started_ts": 1777890066.287248,
+      "ended_ts": null,
+      "point_cap_used": 2,
+      "game_cap_used": 1
+    },
+    "2": {
+      "match_id": "SW-015",
+      "phase": "SWISS",
+      "slot_label": "Swiss",
+      "table": 2,
+      "team_a": 4,
+      "team_b": 9,
+      "status": "active",
+      "winner": null,
+      "loser": null,
+      "is_overtime": false,
+      "loser_cups_hit": null,
+      "started_ts": 1777890075.0706577,
+      "ended_ts": null,
+      "point_cap_used": 2,
+      "game_cap_used": 1
+    },
+    "4": {
+      "match_id": "SW-016",
+      "phase": "SWISS",
+      "slot_label": "Swiss",
+      "table": 4,
+      "team_a": 6,
+      "team_b": 10,
+      "status": "active",
+      "winner": null,
+      "loser": null,
+      "is_overtime": false,
+      "loser_cups_hit": null,
+      "started_ts": 1777890079.390703,
+      "ended_ts": null,
+      "point_cap_used": 2,
+      "game_cap_used": 1
+    }
+  },
+  "completed_matches": [
+    {
+      "match_id": "SW-001",
+      "phase": "SWISS",
+      "slot_label": "Swiss",
+      "table": 1,
+      "team_a": 1,
+      "team_b": 2,
+      "status": "finished",
+      "winner": 2,
+      "loser": 1,
+      "is_overtime": false,
+      "loser_cups_hit": 7,
+      "started_ts": 1777889915.2264326,
+      "ended_ts": 1777889997.9335582,
+      "point_cap_used": 2,
+      "game_cap_used": 1
+    },
+    {
+      "match_id": "SW-002",
+      "phase": "SWISS",
+      "slot_label": "Swiss",
+      "table": 2,
+      "team_a": 3,
+      "team_b": 5,
+      "status": "finished",
+      "winner": 3,
+      "loser": 5,
+      "is_overtime": false,
+      "loser_cups_hit": 7,
+      "started_ts": 1777889915.2264585,
+      "ended_ts": 1777890009.6454492,
+      "point_cap_used": 2,
+      "game_cap_used": 1
+    },
+    {
+      "match_id": "SW-003",
+      "phase": "SWISS",
+      "slot_label": "Swiss",
+      "table": 3,
+      "team_a": 4,
+      "team_b": 6,
+      "status": "finished",
+      "winner": 6,
+      "loser": 4,
+      "is_overtime": false,
+      "loser_cups_hit": 5,
+      "started_ts": 1777889915.2264652,
+      "ended_ts": 1777890014.8534918,
+      "point_cap_used": 2,
+      "game_cap_used": 1
+    },
+    {
+      "match_id": "SW-005",
+      "phase": "SWISS",
+      "slot_label": "Swiss",
+      "table": 1,
+      "team_a": 9,
+      "team_b": 10,
+      "status": "finished",
+      "winner": 10,
+      "loser": 9,
+      "is_overtime": false,
+      "loser_cups_hit": 8,
+      "started_ts": 1777889997.935153,
+      "ended_ts": 1777890026.006042,
+      "point_cap_used": 2,
+      "game_cap_used": 1
+    },
+    {
+      "match_id": "SW-004",
+      "phase": "SWISS",
+      "slot_label": "Swiss",
+      "table": 4,
+      "team_a": 7,
+      "team_b": 8,
+      "status": "finished",
+      "winner": 7,
+      "loser": 8,
+      "is_overtime": false,
+      "loser_cups_hit": 6,
+      "started_ts": 1777889915.2264693,
+      "ended_ts": 1777890030.981635,
+      "point_cap_used": 2,
+      "game_cap_used": 1
+    },
+    {
+      "match_id": "SW-008",
+      "phase": "SWISS",
+      "slot_label": "Swiss",
+      "table": 1,
+      "team_a": 15,
+      "team_b": 16,
+      "status": "finished",
+      "winner": 15,
+      "loser": 16,
+      "is_overtime": true,
+      "loser_cups_hit": 11,
+      "started_ts": 1777890026.0071087,
+      "ended_ts": 1777890037.2135482,
+      "point_cap_used": 2,
+      "game_cap_used": 1
+    },
+    {
+      "match_id": "SW-006",
+      "phase": "SWISS",
+      "slot_label": "Swiss",
+      "table": 2,
+      "team_a": 11,
+      "team_b": 12,
+      "status": "finished",
+      "winner": 11,
+      "loser": 12,
+      "is_overtime": false,
+      "loser_cups_hit": 9,
+      "started_ts": 1777890009.6467044,
+      "ended_ts": 1777890043.9896452,
+      "point_cap_used": 2,
+      "game_cap_used": 1
+    },
+    {
+      "match_id": "SW-007",
+      "phase": "SWISS",
+      "slot_label": "Swiss",
+      "table": 3,
+      "team_a": 13,
+      "team_b": 14,
+      "status": "finished",
+      "winner": 14,
+      "loser": 13,
+      "is_overtime": false,
+      "loser_cups_hit": 9,
+      "started_ts": 1777890014.8545973,
+      "ended_ts": 1777890050.1814382,
+      "point_cap_used": 2,
+      "game_cap_used": 1
+    },
+    {
+      "match_id": "SW-012",
+      "phase": "SWISS",
+      "slot_label": "Swiss",
+      "table": 3,
+      "team_a": 23,
+      "team_b": 24,
+      "status": "finished",
+      "winner": 23,
+      "loser": 24,
+      "is_overtime": false,
+      "loser_cups_hit": 6,
+      "started_ts": 1777890050.1824813,
+      "ended_ts": 1777890057.3015666,
+      "point_cap_used": 2,
+      "game_cap_used": 1
+    },
+    {
+      "match_id": "SW-010",
+      "phase": "SWISS",
+      "slot_label": "Swiss",
+      "table": 1,
+      "team_a": 19,
+      "team_b": 20,
+      "status": "finished",
+      "winner": 19,
+      "loser": 20,
+      "is_overtime": false,
+      "loser_cups_hit": 7,
+      "started_ts": 1777890037.2146435,
+      "ended_ts": 1777890066.2861578,
+      "point_cap_used": 2,
+      "game_cap_used": 1
+    },
+    {
+      "match_id": "SW-011",
+      "phase": "SWISS",
+      "slot_label": "Swiss",
+      "table": 2,
+      "team_a": 21,
+      "team_b": 22,
+      "status": "finished",
+      "winner": 21,
+      "loser": 22,
+      "is_overtime": false,
+      "loser_cups_hit": 7,
+      "started_ts": 1777890043.9907095,
+      "ended_ts": 1777890075.0695634,
+      "point_cap_used": 2,
+      "game_cap_used": 1
+    },
+    {
+      "match_id": "SW-009",
+      "phase": "SWISS",
+      "slot_label": "Swiss",
+      "table": 4,
+      "team_a": 17,
+      "team_b": 18,
+      "status": "finished",
+      "winner": 17,
+      "loser": 18,
+      "is_overtime": false,
+      "loser_cups_hit": 9,
+      "started_ts": 1777890030.982627,
+      "ended_ts": 1777890079.3894503,
+      "point_cap_used": 2,
+      "game_cap_used": 1
+    }
+  ],
+  "ko_slots": {},
+  "logs": [
+    "[12:18:34] Neues Turnier gestartet.",
+    "[12:18:35] Tisch 1: Team 01 vs Team 02 gestartet.",
+    "[12:18:35] Tisch 2: Team 03 vs Team 05 gestartet.",
+    "[12:18:35] Tisch 3: Team 04 vs Team 06 gestartet.",
+    "[12:18:35] Tisch 4: Team 07 vs Team 08 gestartet.",
+    "[12:19:57] Tisch 1: Team 02 gewinnt gegen Team 01 (3:0 Punkte, Cups +3/-3).",
+    "[12:19:57] Tisch 1: Team 09 vs Team 10 gestartet.",
+    "[12:20:09] Tisch 2: Team 03 gewinnt gegen Team 05 (3:0 Punkte, Cups +3/-3).",
+    "[12:20:09] Tisch 2: Team 11 vs Team 12 gestartet.",
+    "[12:20:14] Tisch 3: Team 06 gewinnt gegen Team 04 (3:0 Punkte, Cups +5/-5).",
+    "[12:20:14] Tisch 3: Team 13 vs Team 14 gestartet.",
+    "[12:20:26] Tisch 1: Team 10 gewinnt gegen Team 09 (3:0 Punkte, Cups +2/-2).",
+    "[12:20:26] Tisch 1: Team 15 vs Team 16 gestartet.",
+    "[12:20:30] Tisch 4: Team 07 gewinnt gegen Team 08 (3:0 Punkte, Cups +4/-4).",
+    "[12:20:30] Tisch 4: Team 17 vs Team 18 gestartet.",
+    "[12:20:37] Tisch 1: Team 15 gewinnt OT gegen Team 16 (2:1 Punkte, Cups +2/0).",
+    "[12:20:37] Tisch 1: Team 19 vs Team 20 gestartet.",
+    "[12:20:43] Tisch 2: Team 11 gewinnt gegen Team 12 (3:0 Punkte, Cups +1/-1).",
+    "[12:20:43] Tisch 2: Team 21 vs Team 22 gestartet.",
+    "[12:20:50] Tisch 3: Team 14 gewinnt gegen Team 13 (3:0 Punkte, Cups +1/-1).",
+    "[12:20:50] Tisch 3: Team 23 vs Team 24 gestartet.",
+    "[12:20:57] Tisch 3: Team 23 gewinnt gegen Team 24 (3:0 Punkte, Cups +4/-4).",
+    "[12:20:57] Tisch 3: Team 02 vs Team 03 gestartet.",
+    "[12:21:06] Tisch 1: Team 19 gewinnt gegen Team 20 (3:0 Punkte, Cups +3/-3).",
+    "[12:21:06] Tisch 1: Team 01 vs Team 05 gestartet.",
+    "[12:21:15] Tisch 2: Team 21 gewinnt gegen Team 22 (3:0 Punkte, Cups +3/-3).",
+    "[12:21:15] Tisch 2: Team 04 vs Team 09 gestartet.",
+    "[12:21:19] Tisch 4: Team 17 gewinnt gegen Team 18 (3:0 Punkte, Cups +1/-1).",
+    "[12:21:19] Tisch 4: Team 06 vs Team 10 gestartet."
+  ],
+  "podium": [],
+  "top4": []
+}
