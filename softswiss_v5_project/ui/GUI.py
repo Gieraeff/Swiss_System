@@ -502,12 +502,12 @@ class TournamentGUI:
 
         preview = self.engine.preview_matches()
         if not preview:
-            tk.Label(next_card, text="Keine Vorschau verfügbar.", bg=PUBLIC_THEME["card"], fg=PUBLIC_THEME["text"], font=("Segoe UI", 16)).pack(anchor="w")
+            tk.Label(next_card, text="Es gibt keine Matches mehr", bg=PUBLIC_THEME["card"], fg=PUBLIC_THEME["text"], font=("Segoe UI", 16)).pack(anchor="w")
         else:
             for row in preview:
-                txt = f"{row['slot']}: {row['team_a']} vs {row['team_b']}"
+                txt = f"{row['team_a']} vs {row['team_b']}"
                 tk.Label(next_card, text=txt, bg=PUBLIC_THEME["card"], fg=PUBLIC_THEME["text"], font=("Segoe UI", 15), anchor="w").pack(anchor="w", pady=2)
-                tk.Label(next_card, text=row["status"], bg=PUBLIC_THEME["card"], fg=PUBLIC_THEME["muted"], font=("Segoe UI", 11), anchor="w").pack(anchor="w", pady=(0, 6))
+                tk.Label(next_card, text=row.get("status", ""), bg=PUBLIC_THEME["card"], fg=PUBLIC_THEME["muted"], font=("Segoe UI", 11), anchor="w").pack(anchor="w", pady=(0, 6))
 
         ranking_tree = ttk.Treeview(ranking_card, columns=("rank", "seed", "team", "pts", "cups", "bh", "rounds"), show="headings", height=18)
         for col, title, width in [

@@ -66,6 +66,15 @@ class Match:
     point_cap_used: int = 0
     game_cap_used: int = 1
     slot_label: str = ""
+    is_placeholder: bool = False
+    placeholder_a: str = ""
+    placeholder_b: str = ""
+    resolved_a: Optional[int] = None
+    resolved_b: Optional[int] = None
+    source_match_id_a: Optional[str] = None
+    source_match_id_b: Optional[str] = None
+    source_outcome_a: Optional[str] = None
+    source_outcome_b: Optional[str] = None
 
     def to_dict(self) -> dict:
         return {
@@ -86,6 +95,15 @@ class Match:
             "point_cap_used": self.point_cap_used,
             "game_cap_used": self.game_cap_used,
             "slot_label": self.slot_label,
+            "is_placeholder": self.is_placeholder,
+            "placeholder_a": self.placeholder_a,
+            "placeholder_b": self.placeholder_b,
+            "resolved_a": self.resolved_a,
+            "resolved_b": self.resolved_b,
+            "source_match_id_a": self.source_match_id_a,
+            "source_match_id_b": self.source_match_id_b,
+            "source_outcome_a": self.source_outcome_a,
+            "source_outcome_b": self.source_outcome_b,
         }
 
     @classmethod
@@ -108,6 +126,15 @@ class Match:
             point_cap_used=int(data.get("point_cap_used", 0)),
             game_cap_used=int(data.get("game_cap_used", 1)),
             slot_label=str(data.get("slot_label", "")),
+            is_placeholder=bool(data.get("is_placeholder", False)),
+            placeholder_a=str(data.get("placeholder_a", "")),
+            placeholder_b=str(data.get("placeholder_b", "")),
+            resolved_a=(int(data["resolved_a"]) if data.get("resolved_a") is not None else None),
+            resolved_b=(int(data["resolved_b"]) if data.get("resolved_b") is not None else None),
+            source_match_id_a=data.get("source_match_id_a"),
+            source_match_id_b=data.get("source_match_id_b"),
+            source_outcome_a=data.get("source_outcome_a"),
+            source_outcome_b=data.get("source_outcome_b"),
         )
 
 

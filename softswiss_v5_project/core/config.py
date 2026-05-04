@@ -35,17 +35,17 @@ PHASE_LABELS = {
 
 PUBLIC_THEME = {
     "bg": "#f4fff9",
-    "panel": "#eafaf2",
+    "panel": "#ffffff",
     "card": "#ffffff",
-    "accent": "#61d4b4",
-    "accent_soft": "#bdf0e0",
-    "accent_dark": "#2f9f86",
+    "accent": "#18c493",
+    "accent_soft": "#77f8cf",
+    "accent_dark": "#479483",
     "text": "#14322d",
     "muted": "#5f7671",
-    "ok": "#2d9d73",
+    "ok": "#2d9d52",
     "warn": "#c88f2f",
     "line": "#cdebdc",
     "highlight": "#e4fbf4",
-    "top8": "#e2fbef",
+    "top8": "#11A6B1",
     "top8_strong": "#cff6e4",
 }

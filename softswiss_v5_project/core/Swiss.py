@@ -17,7 +17,7 @@ from core.config import (
     TOP_CUT,
 )
 from core.models import KOSlot, Match, Team, TournamentState, WavePlan
-from core.scheduler import PairSuggestion, SoftSwissScheduler
+from core.scheduler import SlotParticipant, SoftSwissScheduler, WaveSlotSuggestion
 
 
 class SwissTournamentEngine:
@@ -54,7 +54,8 @@ class SwissTournamentEngine:
         return match_id
 
     def team_name(self, team_id: int) -> str:
-        return self.state.teams[team_id].name
+        team = self.state.teams.get(team_id)
+        return team.name if team else "-"
 
     def get_team(self, team_id: int) -> Team:
         return self.state.teams[team_id]
@@ -162,7 +163,70 @@ class SwissTournamentEngine:
     # Wave / swiss scheduling
     # ------------------------------------------------------------------
 
+    def _apply_slot_participant(self, match: Match, participant: SlotParticipant, side: str) -> None:
+        team_id = participant.team_id or 0
+        placeholder = participant.label if participant.is_placeholder else ""
+        if side == "a":
+            match.team_a = team_id
+            match.placeholder_a = placeholder
+            match.resolved_a = participant.team_id
+            match.source_match_id_a = participant.source_match_id
+            match.source_outcome_a = participant.source_outcome
+        else:
+            match.team_b = team_id
+            match.placeholder_b = placeholder
+            match.resolved_b = participant.team_id
+            match.source_match_id_b = participant.source_match_id
+            match.source_outcome_b = participant.source_outcome
+        match.is_placeholder = bool(match.source_match_id_a or match.source_match_id_b or not match.team_a or not match.team_b)
+
+    def _apply_slot_suggestion(self, match: Match, suggestion: WaveSlotSuggestion) -> None:
+        self._apply_slot_participant(match, suggestion.participant_a, "a")
+        self._apply_slot_participant(match, suggestion.participant_b, "b")
+
     def _build_wave_plan(self, wave_index: int, relaxed: bool = False, target: str = "current") -> None:
+        if target == "prepared":
+            slot_suggestions, point_cap, game_cap = self.scheduler.build_placeholder_wave_bundle(
+                self.state,
+                table_target=SWISS_MATCHES_PER_WAVE,
+                relaxed=relaxed,
+                reference_ts=self.now(),
+            )
+            if len(slot_suggestions) < SWISS_MATCHES_PER_WAVE:
+                if not relaxed:
+                    slot_suggestions, point_cap, game_cap = self.scheduler.build_placeholder_wave_bundle(
+                        self.state,
+                        table_target=SWISS_MATCHES_PER_WAVE,
+                        relaxed=True,
+                        reference_ts=self.now(),
+                    )
+                if len(slot_suggestions) < SWISS_MATCHES_PER_WAVE:
+                    raise ValueError("Fuer diese Welle konnte keine vollstaendige Paarung gefunden werden.")
+
+            wave = WavePlan(wave_index=wave_index, created_ts=self.now(), status="prepared")
+            for idx, suggestion in enumerate(slot_suggestions[:SWISS_MATCHES_PER_WAVE], start=1):
+                match_id = self.next_match_id(f"W{wave_index}")
+                match = Match(
+                    match_id=match_id,
+                    phase="SWISS",
+                    table=None,
+                    team_a=0,
+                    team_b=0,
+                    wave_index=wave_index,
+                    wave_order=idx,
+                    status="pending",
+                    point_cap_used=point_cap,
+                    game_cap_used=game_cap,
+                    slot_label=f"W{wave_index:02d}-{idx:02d}",
+                )
+                self._apply_slot_suggestion(match, suggestion)
+                self.state.matches[match_id] = match
+                wave.match_ids.append(match_id)
+
+            self.state.prepared_wave = wave
+            self.log(f"Welle {wave_index} vorbereitet ({len(wave.match_ids)} Matches).")
+            return
+
         suggestions, point_cap, game_cap = self.scheduler.build_wave_bundle(
             self.state,
             table_target=SWISS_MATCHES_PER_WAVE,
@@ -195,6 +259,8 @@ class SwissTournamentEngine:
                 point_cap_used=suggestion.point_cap_used,
                 game_cap_used=suggestion.game_cap_used,
                 slot_label=f"W{wave_index:02d}-{idx:02d}",
+                resolved_a=suggestion.team_a_id,
+                resolved_b=suggestion.team_b_id,
             )
             self.state.matches[match_id] = match
             wave.match_ids.append(match_id)
@@ -218,31 +284,176 @@ class SwissTournamentEngine:
         self.log(f"Welle {self.state.current_wave.wave_index} wird jetzt aktiv.")
         return True
 
-    def _next_activation_pool(self) -> List[Match]:
-        return self.pending_current_wave()
+    def _pending_matches_from_wave(self, wave: Optional[WavePlan]) -> List[Match]:
+        if not wave:
+            return []
+        matches = [self.state.matches[match_id] for match_id in wave.match_ids if match_id in self.state.matches]
+        return [match for match in matches if match.status == "pending"]
 
-    def _maybe_prepare_next_wave(self) -> None:
-        if self.state.phase != "SWISS":
-            return
-        if self.state.prepared_wave is not None:
-            return
-        if not self.state.current_wave:
-            return
-        if self.current_wave_complete():
-            return
+    def _source_outcome_team_id(self, source_match_id: Optional[str], outcome: Optional[str]) -> Optional[int]:
+        if not source_match_id or not outcome:
+            return None
+        source = self.state.matches.get(source_match_id)
+        if not source or source.status != "finished":
+            return None
+        if outcome == "winner":
+            return source.winner
+        if outcome == "loser":
+            return source.loser
+        return None
+
+    def _resolved_match_side(self, match: Match, side: str, mutate: bool = False) -> Optional[int]:
+        if side == "a":
+            team_id = match.resolved_a or (match.team_a if match.team_a else None)
+            source_team_id = self._source_outcome_team_id(match.source_match_id_a, match.source_outcome_a)
+            if source_team_id is not None:
+                team_id = source_team_id
+            if mutate and team_id is not None:
+                match.resolved_a = team_id
+                match.team_a = team_id
+                match.placeholder_a = ""
+        else:
+            team_id = match.resolved_b or (match.team_b if match.team_b else None)
+            source_team_id = self._source_outcome_team_id(match.source_match_id_b, match.source_outcome_b)
+            if source_team_id is not None:
+                team_id = source_team_id
+            if mutate and team_id is not None:
+                match.resolved_b = team_id
+                match.team_b = team_id
+                match.placeholder_b = ""
+        if mutate:
+            match.is_placeholder = not bool(match.team_a and match.team_b)
+        return team_id
+
+    def _resolved_match_pair(self, match: Match, mutate: bool = False) -> tuple[Optional[int], Optional[int]]:
+        return self._resolved_match_side(match, "a", mutate=mutate), self._resolved_match_side(match, "b", mutate=mutate)
+
+    def _is_legal_swiss_pair(self, team_a_id: int, team_b_id: int) -> bool:
+        if team_a_id == team_b_id:
+            return False
+        team_a = self.state.teams.get(team_a_id)
+        return bool(team_a) and team_b_id not in team_a.opponents
+
+    def _team_ready_for_activation(self, team_id: int) -> bool:
+        team = self.state.teams.get(team_id)
+        return bool(team and team.active_match_id is None and team.swiss_games_played < SWISS_GAMES_PER_TEAM)
+
+    def _can_activate_match(self, match: Match, mutate: bool = False) -> bool:
+        team_a_id, team_b_id = self._resolved_match_pair(match, mutate=mutate)
+        if team_a_id is None or team_b_id is None:
+            return False
+        if not self._team_ready_for_activation(team_a_id) or not self._team_ready_for_activation(team_b_id):
+            return False
+        if match.phase == "SWISS" and not self._is_legal_swiss_pair(team_a_id, team_b_id):
+            return False
+        return True
+
+    def _participant_from_match_side(self, match: Match, side: str) -> Optional[SlotParticipant]:
+        team_id = self._resolved_match_side(match, side, mutate=False)
+        if team_id is not None and team_id in self.state.teams:
+            return self.scheduler.concrete_participant(self.state.teams[team_id])
+
+        if side == "a":
+            source_match_id = match.source_match_id_a
+            source_outcome = match.source_outcome_a
+        else:
+            source_match_id = match.source_match_id_b
+            source_outcome = match.source_outcome_b
+        source = self.state.matches.get(source_match_id or "")
+        if source and source_outcome in {"winner", "loser"}:
+            return self.scheduler.outcome_participant(source, self.state, source_outcome)
+        return None
+
+    def _reassign_wave_remaining(self, wave: Optional[WavePlan]) -> bool:
+        pending = self._pending_matches_from_wave(wave)
+        if not pending:
+            return False
+
+        participants_by_key: Dict[str, SlotParticipant] = {}
+        for match in pending:
+            for side in ("a", "b"):
+                participant = self._participant_from_match_side(match, side)
+                if participant is not None:
+                    participants_by_key[participant.key] = participant
+
+        participants = list(participants_by_key.values())
+        if len(participants) < len(pending) * 2:
+            return False
+
+        suggestions, point_cap, game_cap = self.scheduler.build_slot_wave_bundle(
+            self.state,
+            participants,
+            table_target=len(pending),
+            relaxed=True,
+            reference_ts=self.now(),
+        )
+        if len(suggestions) < len(pending):
+            return False
+
+        for match, suggestion in zip(pending, suggestions):
+            match.team_a = 0
+            match.team_b = 0
+            match.placeholder_a = ""
+            match.placeholder_b = ""
+            match.resolved_a = None
+            match.resolved_b = None
+            match.source_match_id_a = None
+            match.source_match_id_b = None
+            match.source_outcome_a = None
+            match.source_outcome_b = None
+            match.point_cap_used = point_cap
+            match.game_cap_used = game_cap
+            self._apply_slot_suggestion(match, suggestion)
+        return True
+
+    def _next_resolvable_match_from_wave(self, wave: Optional[WavePlan]) -> Optional[Match]:
+        for _attempt in range(2):
+            for match in self._pending_matches_from_wave(wave):
+                if self._can_activate_match(match, mutate=True):
+                    return match
+            if not self._reassign_wave_remaining(wave):
+                break
+        return None
+
+    def _next_activation_pool(self) -> List[Match]:
         if self.pending_current_wave():
-            return
+            return self.pending_current_wave()
+        return self.pending_prepared_wave()
+
+    def _maybe_prepare_next_wave(self) -> bool:
+        if self.state.phase != "SWISS":
+            return False
+        if self.state.prepared_wave is not None:
+            return False
+        if not self.state.current_wave:
+            return False
+        if self.current_wave_complete():
+            return False
+        if self.pending_current_wave():
+            return False
         if self.current_wave_remaining_active() > TABLE_COUNT:
-            return
+            return False
         if self.state.wave_index >= SWISS_WAVES_TOTAL:
-            return
+            return False
         try:
             self._build_wave_plan(self.state.wave_index + 1, relaxed=True, target="prepared")
+            return True
         except ValueError:
             # If even the relaxed search cannot produce a stable preview, keep the current wave intact.
-            return
+            return False
+
+    def _activate_next_match_on_table(self, table: int) -> bool:
+        match = self._next_resolvable_match_from_wave(self.state.current_wave)
+        if match is None and self.state.prepared_wave is not None:
+            match = self._next_resolvable_match_from_wave(self.state.prepared_wave)
+        if match is None:
+            return False
+        self._activate_match(match, table)
+        return True
 
     def _activate_match(self, match: Match, table: int) -> None:
+        if not self._can_activate_match(match, mutate=True):
+            raise ValueError("Dieses Swiss-Match kann noch nicht konfliktfrei gestartet werden.")
         match.status = "active"
         match.table = table
         match.started_ts = self.now()
@@ -271,21 +482,29 @@ class SwissTournamentEngine:
             else:
                 return 0
 
-        self._maybe_prepare_next_wave()
+        prepared_created = self._maybe_prepare_next_wave()
 
         free_tables = self.free_tables()
-        pool = self._next_activation_pool()
         count = 0
-        for table, match in zip(free_tables, pool):
-            self._activate_match(match, table)
-            count += 1
-        if count:
+        for table in free_tables:
+            if self._activate_next_match_on_table(table):
+                count += 1
+        prepared_created = self._maybe_prepare_next_wave() or prepared_created
+        if count or prepared_created:
             self._notify_change()
         return count
 
     def refresh_next_up_plan(self) -> None:
         # deliberately derived from the fixed state; no reshuffling on refresh.
         return
+
+    def _display_match_side(self, match: Match, side: str) -> str:
+        team_id = self._resolved_match_side(match, side, mutate=False)
+        if team_id is not None:
+            return self.team_name(team_id)
+        if side == "a":
+            return match.placeholder_a or "-"
+        return match.placeholder_b or "-"
 
     def _wave_rows_from(self, wave: Optional[WavePlan]) -> List[dict]:
         rows: List[dict] = []
@@ -299,14 +518,18 @@ class SwissTournamentEngine:
                 note = f"läuft an Tisch {match.table}"
             elif match.status == "finished":
                 note = "fertig"
+            elif match.is_placeholder:
+                note = "wartet auf Ergebnis"
+            elif self._can_activate_match(match, mutate=False):
+                note = "bereit"
             else:
                 note = "wartet"
             rows.append(
                 {
                     "order": match.wave_order,
                     "slot": match.slot_label,
-                    "team_a": self.team_name(match.team_a),
-                    "team_b": self.team_name(match.team_b),
+                    "team_a": self._display_match_side(match, "a"),
+                    "team_b": self._display_match_side(match, "b"),
                     "status": match.status,
                     "note": note,
                 }
@@ -324,35 +547,23 @@ class SwissTournamentEngine:
             return []
         rows: List[dict] = []
         for wave in (self.state.current_wave, self.state.prepared_wave):
-            if not wave:
-                continue
-            for match_id in wave.match_ids:
-                match = self.state.matches.get(match_id)
-                if not match or match.status == "finished":
+            for match in self._pending_matches_from_wave(wave):
+                team_a_id, team_b_id = self._resolved_match_pair(match, mutate=False)
+                if team_a_id is None or team_b_id is None:
                     continue
-                if match.status == "active":
-                    status = f"läuft an Tisch {match.table}" if match.table is not None else "läuft"
-                else:
-                    status = "wartet auf freien Tisch"
+                if not self._can_activate_match(match, mutate=False):
+                    continue
                 rows.append(
                     {
-                        "team_a": self.team_name(match.team_a),
-                        "team_b": self.team_name(match.team_b),
-                        "status": status,
+                        "slot": match.slot_label,
+                        "team_a": self.team_name(team_a_id),
+                        "team_b": self.team_name(team_b_id),
+                        "status": "Macht euch bereit",
+                        "wave_order": match.wave_order,
                     }
                 )
                 if len(rows) >= PREVIEW_MATCHES:
                     return rows[:PREVIEW_MATCHES]
-        for match in self.active_matches():
-            if len(rows) >= PREVIEW_MATCHES:
-                break
-            rows.append(
-                {
-                    "team_a": self.team_name(match.team_a),
-                    "team_b": self.team_name(match.team_b),
-                    "status": f"läuft an Tisch {match.table}",
-                }
-            )
         return rows[:PREVIEW_MATCHES]
 
     # ------------------------------------------------------------------
@@ -440,22 +651,20 @@ class SwissTournamentEngine:
         self._maybe_prepare_next_wave()
 
         if self.current_wave_complete():
-            self.state.prepared_wave = None
-            if self.state.wave_index < SWISS_WAVES_TOTAL:
+            if self.state.prepared_wave:
+                self._promote_prepared_wave()
+            elif self.state.wave_index < SWISS_WAVES_TOTAL:
                 try:
                     self._build_wave_plan(self.state.wave_index + 1, relaxed=False, target="current")
                 except ValueError:
                     self._build_wave_plan(self.state.wave_index + 1, relaxed=True, target="current")
-                self.fill_free_tables(relaxed=False)
             else:
                 if not self.state.active_tables:
                     self.start_knockout()
-            return
 
         if freed_table is not None:
-            next_pool = self._next_activation_pool()
-            if next_pool:
-                self._activate_match(next_pool[0], freed_table)
+            self._activate_next_match_on_table(freed_table)
+            self._maybe_prepare_next_wave()
 
     # ------------------------------------------------------------------
     # Knockout
