@@ -119,6 +119,23 @@ class SoftSwissScheduler:
                     return True
         return False
 
+    def _slot_pair_has_only_legal_assignments(self, a: SlotParticipant, b: SlotParticipant, state: TournamentState) -> bool:
+        if a.source_match_id and a.source_match_id == b.source_match_id:
+            return False
+
+        has_assignment = False
+        for a_id in a.possible_team_ids:
+            team_a = state.teams.get(a_id)
+            if not team_a:
+                return False
+            for b_id in b.possible_team_ids:
+                if a_id == b_id:
+                    return False
+                has_assignment = True
+                if b_id in team_a.opponents:
+                    return False
+        return has_assignment
+
     def _valid_slot_pair(
         self,
         a: SlotParticipant,
@@ -126,8 +143,14 @@ class SoftSwissScheduler:
         state: TournamentState,
         point_cap: int,
         game_cap: int,
+        require_all_assignments_legal: bool = False,
     ) -> bool:
-        if not self._slot_pair_has_legal_assignment(a, b, state):
+        legal_assignments = (
+            self._slot_pair_has_only_legal_assignments(a, b, state)
+            if require_all_assignments_legal
+            else self._slot_pair_has_legal_assignment(a, b, state)
+        )
+        if not legal_assignments:
             return False
         if abs(a.swiss_points - b.swiss_points) > point_cap:
             return False
@@ -326,6 +349,7 @@ class SoftSwissScheduler:
         point_cap: int,
         game_cap: int,
         now_ts: float,
+        require_all_assignments_legal: bool = False,
     ) -> Tuple[int, float, Tuple[Tuple[str, str], ...]]:
         if len(participants) < 2:
             return 0, 0.0, tuple()
@@ -334,7 +358,14 @@ class SoftSwissScheduler:
         pair_penalties: Dict[Tuple[str, str], float] = {}
         for idx, participant_a in enumerate(participants):
             for participant_b in participants[idx + 1 :]:
-                if not self._valid_slot_pair(participant_a, participant_b, state, point_cap, game_cap):
+                if not self._valid_slot_pair(
+                    participant_a,
+                    participant_b,
+                    state,
+                    point_cap,
+                    game_cap,
+                    require_all_assignments_legal=require_all_assignments_legal,
+                ):
                     continue
                 pair_key = self._slot_pair_key(participant_a.key, participant_b.key)
                 pair_penalties[pair_key] = self.slot_pair_penalty(participant_a, participant_b, now_ts, point_cap, game_cap)
@@ -402,6 +433,7 @@ class SoftSwissScheduler:
         point_cap: int,
         game_cap: int,
         now_ts: float,
+        require_all_assignments_legal: bool = False,
     ) -> Tuple[List[Tuple[str, str]], Dict[Tuple[str, str], float]]:
         remaining = list(
             sorted(
@@ -423,7 +455,12 @@ class SoftSwissScheduler:
             candidates: List[Tuple[float, int, SlotParticipant]] = []
             for idx in range(1, len(remaining)):
                 second = remaining[idx]
-                if not self._slot_pair_has_legal_assignment(first, second, state):
+                legal_assignments = (
+                    self._slot_pair_has_only_legal_assignments(first, second, state)
+                    if require_all_assignments_legal
+                    else self._slot_pair_has_legal_assignment(first, second, state)
+                )
+                if not legal_assignments:
                     continue
                 penalty = self.slot_pair_penalty(first, second, now_ts, point_cap, game_cap)
                 penalty += max(0, abs(first.swiss_points - second.swiss_points) - point_cap) * 1200.0
@@ -450,6 +487,7 @@ class SoftSwissScheduler:
         table_target: int,
         relaxed: bool = False,
         reference_ts: float | None = None,
+        require_all_assignments_legal: bool = False,
     ) -> Tuple[List[WaveSlotSuggestion], int, int]:
         if table_target <= 0:
             return [], DEFAULT_POINT_CAP, DEFAULT_GAME_CAP
@@ -468,7 +506,15 @@ class SoftSwissScheduler:
 
         for game_cap in game_caps:
             for point_cap in point_caps:
-                count, score, pairs = self._solve_best_slot_bundle(state, participants, table_target, point_cap, game_cap, reference_ts)
+                count, score, pairs = self._solve_best_slot_bundle(
+                    state,
+                    participants,
+                    table_target,
+                    point_cap,
+                    game_cap,
+                    reference_ts,
+                    require_all_assignments_legal=require_all_assignments_legal,
+                )
                 if count > best_count or (count == best_count and score < best_score):
                     best_count = count
                     best_score = score
@@ -483,7 +529,15 @@ class SoftSwissScheduler:
                         )
 
         if best_count < table_target:
-            fallback_pairs, fallback_penalties = self._greedy_slot_bundle(state, participants, table_target, best_point_cap, best_game_cap, reference_ts)
+            fallback_pairs, fallback_penalties = self._greedy_slot_bundle(
+                state,
+                participants,
+                table_target,
+                best_point_cap,
+                best_game_cap,
+                reference_ts,
+                require_all_assignments_legal=require_all_assignments_legal,
+            )
             if len(fallback_pairs) > len(best_pairs):
                 best_pairs = tuple(fallback_pairs)
                 best_penalty_map = fallback_penalties
@@ -507,6 +561,7 @@ class SoftSwissScheduler:
         table_target: int,
         relaxed: bool = False,
         reference_ts: float | None = None,
+        require_all_assignments_legal: bool = False,
     ) -> Tuple[List[WaveSlotSuggestion], int, int]:
         active_matches: List[Match] = []
         if state.current_wave:
@@ -529,7 +584,14 @@ class SoftSwissScheduler:
             participants.append(self.outcome_participant(match, state, "winner"))
             participants.append(self.outcome_participant(match, state, "loser"))
 
-        return self.build_slot_wave_bundle(state, participants, table_target, relaxed=relaxed, reference_ts=reference_ts)
+        return self.build_slot_wave_bundle(
+            state,
+            participants,
+            table_target,
+            relaxed=relaxed,
+            reference_ts=reference_ts,
+            require_all_assignments_legal=require_all_assignments_legal,
+        )
 
     def build_wave_bundle(
         self,

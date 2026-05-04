@@ -1,8 +1,8 @@
 Phase: FINISHED
-Podium: Team 01, Team 05, Team 03
-Top4: Team 01, Team 05, Team 03, Team 11
+Podium: Team 01, Team 08, Team 05
+Top4: Team 01, Team 08, Team 05, Team 02
 Swiss matches: 60/60
-Max games diff observed: 1
+Max games diff observed: 2
 Rematch pairs tracked: 60
 Waves completed: 5
 Autosave roundtrip ok: True

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import random
+import shutil
 import sys
 from pathlib import Path
 from typing import Dict, List, Tuple
@@ -83,9 +84,16 @@ def simulate_turnier(seed: int = 42) -> Dict[str, object]:
     }
 
     # Autosave round-trip.
-    bm = BackupManager()
-    bm.save_state(engine.state, label="simulation", snapshot=False)
-    loaded = bm.load_state()
+    tmp_path = ROOT / "data" / ".simulation_tmp"
+    if tmp_path.exists():
+        shutil.rmtree(tmp_path)
+    try:
+        bm = BackupManager(autosave_file=tmp_path / "autosave.json", snapshot_dir=tmp_path / "snapshots")
+        bm.save_state(engine.state, label="simulation", snapshot=False)
+        loaded = bm.load_state()
+    finally:
+        if tmp_path.exists():
+            shutil.rmtree(tmp_path)
     report["autosave_roundtrip_ok"] = loaded.phase == engine.state.phase and len(loaded.teams) == len(engine.state.teams)
     return report
 

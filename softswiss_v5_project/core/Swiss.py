@@ -191,6 +191,7 @@ class SwissTournamentEngine:
                 table_target=SWISS_MATCHES_PER_WAVE,
                 relaxed=relaxed,
                 reference_ts=self.now(),
+                require_all_assignments_legal=True,
             )
             if len(slot_suggestions) < SWISS_MATCHES_PER_WAVE:
                 if not relaxed:
@@ -199,6 +200,7 @@ class SwissTournamentEngine:
                         table_target=SWISS_MATCHES_PER_WAVE,
                         relaxed=True,
                         reference_ts=self.now(),
+                        require_all_assignments_legal=True,
                     )
                 if len(slot_suggestions) < SWISS_MATCHES_PER_WAVE:
                     raise ValueError("Fuer diese Welle konnte keine vollstaendige Paarung gefunden werden.")
@@ -275,14 +277,27 @@ class SwissTournamentEngine:
             self.log(f"Welle {wave_index} gestartet ({len(wave.match_ids)} Matches).")
 
     def _promote_prepared_wave(self) -> bool:
-        if not self.state.prepared_wave:
+        prepared_wave = self.state.prepared_wave
+        if not prepared_wave:
             return False
-        self.state.current_wave = self.state.prepared_wave
+        if not self._pending_wave_is_activation_safe(prepared_wave) and not self._reassign_wave_remaining(prepared_wave):
+            self._discard_wave_matches(prepared_wave)
+            self.state.prepared_wave = None
+            self.log("Vorbereitete Welle verworfen, weil sie nicht rematchfrei auflösbar war.")
+            return False
+
+        self.state.current_wave = prepared_wave
         self.state.current_wave.status = "active"
         self.state.prepared_wave = None
         self.state.wave_index = self.state.current_wave.wave_index
         self.log(f"Welle {self.state.current_wave.wave_index} wird jetzt aktiv.")
         return True
+
+    def _discard_wave_matches(self, wave: WavePlan) -> None:
+        for match_id in wave.match_ids:
+            match = self.state.matches.get(match_id)
+            if match and match.status == "pending":
+                del self.state.matches[match_id]
 
     def _pending_matches_from_wave(self, wave: Optional[WavePlan]) -> List[Match]:
         if not wave:
@@ -348,6 +363,10 @@ class SwissTournamentEngine:
             return False
         return True
 
+    def _match_is_resolved_rematch(self, match: Match) -> bool:
+        team_a_id, team_b_id = self._resolved_match_pair(match, mutate=False)
+        return bool(team_a_id and team_b_id and match.phase == "SWISS" and not self._is_legal_swiss_pair(team_a_id, team_b_id))
+
     def _participant_from_match_side(self, match: Match, side: str) -> Optional[SlotParticipant]:
         team_id = self._resolved_match_side(match, side, mutate=False)
         if team_id is not None and team_id in self.state.teams:
@@ -364,6 +383,47 @@ class SwissTournamentEngine:
             return self.scheduler.outcome_participant(source, self.state, source_outcome)
         return None
 
+    def _pending_wave_is_activation_safe(self, wave: Optional[WavePlan], ignored_match_id: Optional[str] = None) -> bool:
+        seen_team_ids: set[int] = set()
+        for match in self._pending_matches_from_wave(wave):
+            if match.match_id == ignored_match_id:
+                continue
+            if not self._can_activate_match(match, mutate=False):
+                return False
+            team_a_id, team_b_id = self._resolved_match_pair(match, mutate=False)
+            if team_a_id is None or team_b_id is None:
+                return False
+            if team_a_id in seen_team_ids or team_b_id in seen_team_ids:
+                return False
+            seen_team_ids.add(team_a_id)
+            seen_team_ids.add(team_b_id)
+        return True
+
+    def _pending_wave_is_plan_safe(self, wave: Optional[WavePlan], ignored_match_id: Optional[str] = None) -> bool:
+        for match in self._pending_matches_from_wave(wave):
+            if match.match_id == ignored_match_id:
+                continue
+
+            participant_a = self._participant_from_match_side(match, "a")
+            participant_b = self._participant_from_match_side(match, "b")
+            if participant_a is None or participant_b is None:
+                return False
+
+            if participant_a.is_placeholder or participant_b.is_placeholder:
+                if not self.scheduler._slot_pair_has_only_legal_assignments(participant_a, participant_b, self.state):
+                    return False
+                continue
+
+            if participant_a.team_id is None or participant_b.team_id is None:
+                return False
+            if not self._is_legal_swiss_pair(participant_a.team_id, participant_b.team_id):
+                return False
+            if self.state.teams[participant_a.team_id].swiss_games_played >= SWISS_GAMES_PER_TEAM:
+                return False
+            if self.state.teams[participant_b.team_id].swiss_games_played >= SWISS_GAMES_PER_TEAM:
+                return False
+        return True
+
     def _reassign_wave_remaining(self, wave: Optional[WavePlan]) -> bool:
         pending = self._pending_matches_from_wave(wave)
         if not pending:
@@ -379,6 +439,7 @@ class SwissTournamentEngine:
         participants = list(participants_by_key.values())
         if len(participants) < len(pending) * 2:
             return False
+        require_all_assignments_legal = any(participant.is_placeholder for participant in participants)
 
         suggestions, point_cap, game_cap = self.scheduler.build_slot_wave_bundle(
             self.state,
@@ -386,6 +447,7 @@ class SwissTournamentEngine:
             table_target=len(pending),
             relaxed=True,
             reference_ts=self.now(),
+            require_all_assignments_legal=require_all_assignments_legal,
         )
         if len(suggestions) < len(pending):
             return False
@@ -404,12 +466,20 @@ class SwissTournamentEngine:
             match.point_cap_used = point_cap
             match.game_cap_used = game_cap
             self._apply_slot_suggestion(match, suggestion)
-        return True
+        return self._pending_wave_is_plan_safe(wave)
 
     def _next_resolvable_match_from_wave(self, wave: Optional[WavePlan]) -> Optional[Match]:
         for _attempt in range(2):
-            for match in self._pending_matches_from_wave(wave):
-                if self._can_activate_match(match, mutate=True):
+            pending = self._pending_matches_from_wave(wave)
+            if not pending:
+                return None
+            if not self._pending_wave_is_plan_safe(wave):
+                if self._reassign_wave_remaining(wave):
+                    continue
+
+            for match in pending:
+                if self._can_activate_match(match, mutate=False) and self._pending_wave_is_plan_safe(wave, ignored_match_id=match.match_id):
+                    self._can_activate_match(match, mutate=True)
                     return match
             if not self._reassign_wave_remaining(wave):
                 break
@@ -475,8 +545,8 @@ class SwissTournamentEngine:
                 self._build_wave_plan(self.state.wave_index + 1 if self.state.wave_index else 1, relaxed=True, target="current")
 
         if self.current_wave_complete():
-            if self.state.prepared_wave:
-                self._promote_prepared_wave()
+            if self.state.prepared_wave and self._promote_prepared_wave():
+                pass
             elif self.state.wave_index < SWISS_WAVES_TOTAL:
                 self._build_wave_plan(self.state.wave_index + 1, relaxed=relaxed, target="current")
             else:
@@ -522,6 +592,8 @@ class SwissTournamentEngine:
                 note = "wartet auf Ergebnis"
             elif self._can_activate_match(match, mutate=False):
                 note = "bereit"
+            elif self._match_is_resolved_rematch(match):
+                note = "blockiert (Rematch)"
             else:
                 note = "wartet"
             rows.append(
@@ -651,8 +723,8 @@ class SwissTournamentEngine:
         self._maybe_prepare_next_wave()
 
         if self.current_wave_complete():
-            if self.state.prepared_wave:
-                self._promote_prepared_wave()
+            if self.state.prepared_wave and self._promote_prepared_wave():
+                pass
             elif self.state.wave_index < SWISS_WAVES_TOTAL:
                 try:
                     self._build_wave_plan(self.state.wave_index + 1, relaxed=False, target="current")

@@ -509,10 +509,9 @@ class TournamentGUI:
                 tk.Label(next_card, text=txt, bg=PUBLIC_THEME["card"], fg=PUBLIC_THEME["text"], font=("Segoe UI", 15), anchor="w").pack(anchor="w", pady=2)
                 tk.Label(next_card, text=row.get("status", ""), bg=PUBLIC_THEME["card"], fg=PUBLIC_THEME["muted"], font=("Segoe UI", 11), anchor="w").pack(anchor="w", pady=(0, 6))
 
-        ranking_tree = ttk.Treeview(ranking_card, columns=("rank", "seed", "team", "pts", "cups", "bh", "rounds"), show="headings", height=18)
+        ranking_tree = ttk.Treeview(ranking_card, columns=("rank", "team", "pts", "cups", "bh", "rounds"), show="headings", height=18)
         for col, title, width in [
             ("rank", "#", 40),
-            ("seed", "Seed", 60),
             ("team", "Team", 220),
             ("pts", "Pkt", 55),
             ("cups", "Cups", 70),
@@ -528,7 +527,7 @@ class TournamentGUI:
             tags = ()
             if row["rank"] <= TOP_CUT:
                 tags = ("top8strong" if row["rank"] == TOP_CUT else "top8",)
-            ranking_tree.insert("", "end", values=(row["rank"], row["seed"], row["name"], row["points"], row["cups"], row["buchholz"], row["games"]), tags=tags)
+            ranking_tree.insert("", "end", values=(row["rank"], row["name"], row["points"], row["cups"], row["buchholz"], row["games"]), tags=tags)
 
     def _render_player_knockout_view(self) -> None:
         content = self.player_body
@@ -543,6 +542,7 @@ class TournamentGUI:
 
         canvas = tk.Canvas(bracket_card, bg=PUBLIC_THEME["card"], highlightthickness=0)
         canvas.pack(fill="both", expand=True)
+        canvas.bind("<Configure>", lambda _event, c=canvas: self._draw_bracket_canvas(c))
         self._draw_bracket_canvas(canvas)
 
         podium_card = self._public_card(content, "Podest")
@@ -562,31 +562,63 @@ class TournamentGUI:
     def _draw_bracket_canvas(self, canvas: tk.Canvas) -> None:
         canvas.delete("all")
         rows = self.engine.knockout_rows()
-        width = max(canvas.winfo_width(), 1200)
-        height = max(canvas.winfo_height(), 560)
+        width = max(canvas.winfo_width(), 1100)
+        height = max(canvas.winfo_height(), 620)
         if width <= 1 or height <= 1:
-            width, height = 1200, 560
+            width, height = 1100, 620
+
+        if not rows:
+            canvas.create_text(
+                70,
+                70,
+                anchor="nw",
+                text="KO-Phase wird erst nach Abschluss der Swiss-Wellen angezeigt.",
+                fill=PUBLIC_THEME["muted"],
+                font=("Segoe UI", 15),
+            )
+            return
+
+        box_h = 112
+        qf_w = max(270, min(330, int(width * 0.24)))
+        sf_w = max(300, min(360, int(width * 0.26)))
+        final_w = max(320, min(390, int(width * 0.28)))
+        qf_x = max(42, int(width * 0.055))
+        sf_x = max(qf_x + qf_w + 58, int(width * 0.39))
+        final_x = max(sf_x + sf_w + 58, int(width * 0.70))
+        final_w = min(final_w, max(280, width - final_x - 45))
+
+        qf_gap = max(22, min(40, int((height - 120 - (box_h * 4)) / 3)))
+        qf_y = [62 + idx * (box_h + qf_gap) for idx in range(4)]
+        sf_y = [
+            int(((qf_y[0] + box_h / 2) + (qf_y[1] + box_h / 2)) / 2 - box_h / 2),
+            int(((qf_y[2] + box_h / 2) + (qf_y[3] + box_h / 2)) / 2 - box_h / 2),
+        ]
+        sf_center = int(((sf_y[0] + box_h / 2) + (sf_y[1] + box_h / 2)) / 2)
+        final_y = max(92, sf_center - box_h - 28)
+        third_y = final_y + box_h + 54
 
         positions = {
-            "QF": [(70, 70), (70, 180), (70, 290), (70, 400)],
-            "SF": [(420, 125), (420, 345)],
-            "FINAL": [(780, 180)],
-            "3RD": [(780, 320)],
+            "QF": [(qf_x, y) for y in qf_y],
+            "SF": [(sf_x, y) for y in sf_y],
+            "FINAL": [(final_x, final_y)],
+            "3RD": [(final_x, third_y)],
         }
 
         def draw_box(x: int, y: int, w: int, h: int, title: str, team_a: str, team_b: str, status: str, winner: str) -> None:
             fill = PUBLIC_THEME["highlight"] if status == "active" else PUBLIC_THEME["card"]
             outline = PUBLIC_THEME["accent_dark"] if status == "finished" else PUBLIC_THEME["line"]
+            title_color = "white" if status == "active" else PUBLIC_THEME["accent_dark"]
+            text_color = "white" if status == "active" else PUBLIC_THEME["text"]
             canvas.create_rectangle(x, y, x + w, y + h, fill=fill, outline=outline, width=2)
-            canvas.create_text(x + 12, y + 10, anchor="nw", text=title, fill=PUBLIC_THEME["accent_dark"], font=("Segoe UI", 13, "bold"))
-            canvas.create_text(x + 12, y + 36, anchor="nw", text=team_a, fill=PUBLIC_THEME["text"], font=("Segoe UI", 12, "bold"))
-            canvas.create_text(x + 12, y + 58, anchor="nw", text=team_b, fill=PUBLIC_THEME["text"], font=("Segoe UI", 12, "bold"))
+            canvas.create_text(x + 14, y + 12, anchor="nw", text=title, fill=title_color, font=("Segoe UI", 15, "bold"), width=w - 28)
+            canvas.create_text(x + 14, y + 44, anchor="nw", text=team_a, fill=text_color, font=("Segoe UI", 13, "bold"), width=w - 28)
+            canvas.create_text(x + 14, y + 69, anchor="nw", text=team_b, fill=text_color, font=("Segoe UI", 13, "bold"), width=w - 28)
             if status == "finished":
-                canvas.create_text(x + w - 12, y + h - 12, anchor="se", text=f"Sieger: {winner}", fill=PUBLIC_THEME["ok"], font=("Segoe UI", 10, "bold"))
+                canvas.create_text(x + 14, y + h - 24, anchor="nw", text=f"Sieger: {winner}", fill=PUBLIC_THEME["ok"], font=("Segoe UI", 11, "bold"), width=w - 28)
             elif status == "active":
-                canvas.create_text(x + w - 12, y + h - 12, anchor="se", text="läuft", fill=PUBLIC_THEME["warn"], font=("Segoe UI", 10, "bold"))
+                canvas.create_text(x + 14, y + h - 24, anchor="nw", text="läuft", fill="white", font=("Segoe UI", 11, "bold"))
             else:
-                canvas.create_text(x + w - 12, y + h - 12, anchor="se", text="wartet", fill=PUBLIC_THEME["muted"], font=("Segoe UI", 10, "bold"))
+                canvas.create_text(x + 14, y + h - 24, anchor="nw", text="wartet", fill=PUBLIC_THEME["muted"], font=("Segoe UI", 11, "bold"))
 
         def row_for(stage: str, label: str):
             for row in rows:
@@ -598,35 +630,37 @@ class TournamentGUI:
             label = f"Viertelfinale {idx}"
             row = row_for("QF", label)
             if row:
-                draw_box(x, y, 260, 70, label, row["team_a"], row["team_b"], row["status"], row["winner"])
+                draw_box(x, y, qf_w, box_h, label, row["team_a"], row["team_b"], row["status"], row["winner"])
 
         for idx, (x, y) in enumerate(positions["SF"], start=1):
             label = f"Halbfinale {idx}"
             row = row_for("SF", label)
             if row:
-                draw_box(x, y, 280, 70, label, row["team_a"], row["team_b"], row["status"], row["winner"])
+                draw_box(x, y, sf_w, box_h, label, row["team_a"], row["team_b"], row["status"], row["winner"])
 
         for stage, label, (x, y) in [("FINAL", "Finale", positions["FINAL"][0]), ("3RD", "Spiel um Platz 3", positions["3RD"][0])]:
             row = row_for(stage, label)
             if row:
-                draw_box(x, y, 320, 70, label, row["team_a"], row["team_b"], row["status"], row["winner"])
+                draw_box(x, y, final_w, box_h, label, row["team_a"], row["team_b"], row["status"], row["winner"])
 
         # Connectors.
-        def line(x1: int, y1: int, x2: int, y2: int) -> None:
-            canvas.create_line(x1, y1, x2, y2, fill=PUBLIC_THEME["accent_dark"], width=3)
+        def connector(from_x: int, from_y: int, from_w: int, to_x: int, to_y: int) -> None:
+            x1 = from_x + from_w
+            y1 = from_y + box_h // 2
+            x2 = to_x
+            y2 = to_y + box_h // 2
+            mid_x = int((x1 + x2) / 2)
+            canvas.create_line(x1, y1, mid_x, y1, mid_x, y2, x2, y2, fill=PUBLIC_THEME["accent_dark"], width=3, tags=("connector",))
 
-        # QF -> SF
-        line(330, 105, 390, 160)
-        line(330, 215, 390, 160)
-        line(330, 325, 390, 380)
-        line(330, 435, 390, 380)
-        # SF -> Final / 3rd
-        line(700, 160, 760, 215)
-        line(700, 380, 760, 215)
-        line(700, 160, 760, 355)
-        line(700, 380, 760, 355)
-
-        canvas.create_text(70, 25, anchor="nw", text="KO-Phase wird erst nach Abschluss der Swiss-Wellen angezeigt.", fill=PUBLIC_THEME["muted"], font=("Segoe UI", 12))
+        connector(qf_x, qf_y[0], qf_w, sf_x, sf_y[0])
+        connector(qf_x, qf_y[1], qf_w, sf_x, sf_y[0])
+        connector(qf_x, qf_y[2], qf_w, sf_x, sf_y[1])
+        connector(qf_x, qf_y[3], qf_w, sf_x, sf_y[1])
+        connector(sf_x, sf_y[0], sf_w, final_x, final_y)
+        connector(sf_x, sf_y[1], sf_w, final_x, final_y)
+        connector(sf_x, sf_y[0], sf_w, final_x, third_y)
+        connector(sf_x, sf_y[1], sf_w, final_x, third_y)
+        canvas.tag_lower("connector")
 
     # ------------------------------------------------------------------
     # Actions
