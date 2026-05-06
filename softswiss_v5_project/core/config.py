@@ -34,18 +34,58 @@ PHASE_LABELS = {
 }
 
 PUBLIC_THEME = {
-    "bg": "#f4fff9",
-    "panel": "#e61e1e",
-    "card": "#ffffff",
-    "accent": "#be1111",
-    "accent_soft": "#d40606",
-    "accent_dark": "#944747",
-    "text": "#14322d",
-    "muted": "#5f7671",
-    "ok": "#2d9d52",
-    "warn": "#c88f2f",
-    "line": "#cdebdc",
-    "highlight": "#920707",
-    "top8": "#9DD5DA",
-    "top8_strong": "#cff6e4",
+    # Hintergrund (sehr hell, reflektionsarm)
+    "bg": "#F6F8F3",
+
+    # Panels (neutral + leichter Bier-Ton)
+    "panel": "#EEF2EA",
+    "surface": "#F9FBF7",
+    "surface_alt": "#F1F5EE",
+
+    # Karten / Listen
+    "card": "#FFFFFF",
+    "row": "#FFFFFF",
+    "row_alt": "#F7FAF5",
+    "shadow": "#DDE5DA",
+
+    # Hauptfarbe (Beerpong Cup Rot)
+    "accent": "#C84D32",
+
+    # Hover / Buttons
+    "accent_soft": "#FFF0E8",
+    "accent_warm": "#F2B35D",
+
+    # Dunkler Rotton für wichtige Elemente
+    "accent_dark": "#84301F",
+
+    # Text (sehr dunkles Grün statt Schwarz → angenehmer draußen)
+    "text": "#17251F",
+    "text_soft": "#33443C",
+
+    # Sekundärer Text
+    "muted": "#69756D",
+
+    # Erfolg / Sieg
+    "ok": "#287D68",
+    "ok_soft": "#E8F5EF",
+
+    # Warnung / OT / kritisch
+    "warn": "#D7A642",
+    "warn_soft": "#FFF6DB",
+
+    # Sehr dezente Linien und Trennungen
+    "line": "#E1E8DE",
+    "line_soft": "#EDF2EA",
+
+    # Highlight (aktive Spiele / Fokus)
+    "highlight": "#E36A3D",
+    "highlight_soft": "#FFF3EC",
+
+    # Top 8: erkennbar, aber ohne schwere Flaechen
+    "top8": "#F1FAF4",
+
+    # Top 8 stark (Cutline)
+    "top8_strong": "#E4F5EA",
+    "top8_strip": "#45A875",
+    "top8_badge": "#DDF2E6",
 }
