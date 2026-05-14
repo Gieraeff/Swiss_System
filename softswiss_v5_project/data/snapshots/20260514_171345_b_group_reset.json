@@ -1,9 +1,9 @@
 {
-  "saved_at": "2026-05-14T12:43:28",
-  "label": "edit_match",
+  "saved_at": "2026-05-14T17:13:45",
+  "label": "b_group_reset",
   "state": {
     "phase": "SWISS",
-    "started_at": 1778755329.849809,
+    "started_at": 1778770353.8326154,
     "match_counter": 13,
     "wave_index": 1,
     "teams": [
@@ -160,7 +160,7 @@
         "swiss_games_played": 0,
         "opponents": [],
         "last_finish_ts": 0.0,
-        "active_match_id": "W1-0006",
+        "active_match_id": null,
         "ko_seed": null
       },
       {
@@ -172,7 +172,7 @@
         "swiss_games_played": 0,
         "opponents": [],
         "last_finish_ts": 0.0,
-        "active_match_id": "W1-0006",
+        "active_match_id": null,
         "ko_seed": null
       },
       {
@@ -184,7 +184,7 @@
         "swiss_games_played": 0,
         "opponents": [],
         "last_finish_ts": 0.0,
-        "active_match_id": "W1-0005",
+        "active_match_id": null,
         "ko_seed": null
       },
       {
@@ -196,7 +196,7 @@
         "swiss_games_played": 0,
         "opponents": [],
         "last_finish_ts": 0.0,
-        "active_match_id": "W1-0005",
+        "active_match_id": null,
         "ko_seed": null
       },
       {
@@ -227,14 +227,12 @@
         "id": 19,
         "name": "Mario und Luigi",
         "seed": 19,
-        "swiss_points": 3,
-        "cups_metric": 4,
-        "swiss_games_played": 1,
-        "opponents": [
-          20
-        ],
-        "last_finish_ts": 1778755392.7950168,
-        "active_match_id": null,
+        "swiss_points": 0,
+        "cups_metric": 0,
+        "swiss_games_played": 0,
+        "opponents": [],
+        "last_finish_ts": 0.0,
+        "active_match_id": "W1-0003",
         "ko_seed": null
       },
       {
@@ -242,13 +240,11 @@
         "name": "Promille Athleten",
         "seed": 20,
         "swiss_points": 0,
-        "cups_metric": -4,
-        "swiss_games_played": 1,
-        "opponents": [
-          19
-        ],
-        "last_finish_ts": 1778755392.7950168,
-        "active_match_id": null,
+        "cups_metric": 0,
+        "swiss_games_played": 0,
+        "opponents": [],
+        "last_finish_ts": 0.0,
+        "active_match_id": "W1-0003",
         "ko_seed": null
       },
       {
@@ -279,14 +275,12 @@
         "id": 23,
         "name": "Montafon 2",
         "seed": 23,
-        "swiss_points": 3,
-        "cups_metric": 10,
-        "swiss_games_played": 1,
-        "opponents": [
-          24
-        ],
-        "last_finish_ts": 1778755391.602975,
-        "active_match_id": null,
+        "swiss_points": 0,
+        "cups_metric": 0,
+        "swiss_games_played": 0,
+        "opponents": [],
+        "last_finish_ts": 0.0,
+        "active_match_id": "W1-0001",
         "ko_seed": null
       },
       {
@@ -294,13 +288,11 @@
         "name": "Bauer Beni",
         "seed": 24,
         "swiss_points": 0,
-        "cups_metric": -10,
-        "swiss_games_played": 1,
-        "opponents": [
-          23
-        ],
-        "last_finish_ts": 1778755391.602975,
-        "active_match_id": null,
+        "cups_metric": 0,
+        "swiss_games_played": 0,
+        "opponents": [],
+        "last_finish_ts": 0.0,
+        "active_match_id": "W1-0001",
         "ko_seed": null
       }
     ],
@@ -313,13 +305,13 @@
         "team_b": 24,
         "wave_index": 1,
         "wave_order": 1,
-        "status": "finished",
-        "winner": 23,
-        "loser": 24,
+        "status": "active",
+        "winner": null,
+        "loser": null,
         "is_overtime": false,
-        "loser_cups_hit": 0,
-        "started_ts": 1778755330.1771364,
-        "ended_ts": 1778755391.602975,
+        "loser_cups_hit": null,
+        "started_ts": 1778770354.1869237,
+        "ended_ts": null,
         "point_cap_used": 2,
         "game_cap_used": 1,
         "slot_label": "W01-01",
@@ -346,7 +338,7 @@
         "loser": null,
         "is_overtime": false,
         "loser_cups_hit": null,
-        "started_ts": 1778755330.1772103,
+        "started_ts": 1778770354.186997,
         "ended_ts": null,
         "point_cap_used": 2,
         "game_cap_used": 1,
@@ -369,13 +361,13 @@
         "team_b": 20,
         "wave_index": 1,
         "wave_order": 3,
-        "status": "finished",
-        "winner": 19,
-        "loser": 20,
+        "status": "active",
+        "winner": null,
+        "loser": null,
         "is_overtime": false,
-        "loser_cups_hit": 6,
-        "started_ts": 1778755330.1772735,
-        "ended_ts": 1778755392.7950168,
+        "loser_cups_hit": null,
+        "started_ts": 1778770354.1870606,
+        "ended_ts": null,
         "point_cap_used": 2,
         "game_cap_used": 1,
         "slot_label": "W01-03",
@@ -402,7 +394,7 @@
         "loser": null,
         "is_overtime": false,
         "loser_cups_hit": null,
-        "started_ts": 1778755330.1773276,
+        "started_ts": 1778770354.1871169,
         "ended_ts": null,
         "point_cap_used": 2,
         "game_cap_used": 1,
@@ -420,17 +412,17 @@
       "W1-0005": {
         "match_id": "W1-0005",
         "phase": "SWISS",
-        "table": 1,
+        "table": null,
         "team_a": 15,
         "team_b": 16,
         "wave_index": 1,
         "wave_order": 5,
-        "status": "active",
+        "status": "pending",
         "winner": null,
         "loser": null,
         "is_overtime": false,
         "loser_cups_hit": null,
-        "started_ts": 1778755391.6031392,
+        "started_ts": 0.0,
         "ended_ts": null,
         "point_cap_used": 2,
         "game_cap_used": 1,
@@ -448,17 +440,17 @@
       "W1-0006": {
         "match_id": "W1-0006",
         "phase": "SWISS",
-        "table": 3,
+        "table": null,
         "team_a": 13,
         "team_b": 14,
         "wave_index": 1,
         "wave_order": 6,
-        "status": "active",
+        "status": "pending",
         "winner": null,
         "loser": null,
         "is_overtime": false,
         "loser_cups_hit": null,
-        "started_ts": 1778755392.7952156,
+        "started_ts": 0.0,
         "ended_ts": null,
         "point_cap_used": 2,
         "game_cap_used": 1,
@@ -643,15 +635,12 @@
       }
     },
     "active_tables": {
+      "1": "W1-0001",
       "2": "W1-0002",
-      "4": "W1-0004",
-      "1": "W1-0005",
-      "3": "W1-0006"
+      "3": "W1-0003",
+      "4": "W1-0004"
     },
-    "completed_match_ids": [
-      "W1-0001",
-      "W1-0003"
-    ],
+    "completed_match_ids": [],
     "current_wave": {
       "wave_index": 1,
       "match_ids": [
@@ -668,31 +657,34 @@
         "W1-0011",
         "W1-0012"
       ],
-      "created_ts": 1778755330.1766443,
+      "created_ts": 1778770354.1865048,
       "status": "active"
     },
     "prepared_wave": null,
     "ko_slots": {},
     "logs": [
-      "[12:42:09] Neues Turnier gestartet.",
-      "[12:42:10] Welle 1 gestartet (12 Matches).",
-      "[12:42:10] Tisch 1: Montafon 2 vs Bauer Beni gestartet.",
-      "[12:42:10] Tisch 2: Die Becher Brüder vs Motafon 1 gestartet.",
-      "[12:42:10] Tisch 3: Mario und Luigi vs Promille Athleten gestartet.",
-      "[12:42:10] Tisch 4: Apex vs 69 Elite gestartet.",
-      "[12:43:09] Tisch 1: Montafon 2 gewinnt gegen Bauer Beni (3:0 Punkte, Cups +10/-10).",
-      "[12:43:09] Tisch 1: Grußige Cowboys vs Halda gestartet.",
-      "[12:43:10] Letzte Eingabe zurueckgenommen: W01-01.",
-      "[12:43:11] Tisch 1: Montafon 2 gewinnt gegen Bauer Beni (3:0 Punkte, Cups +10/-10).",
-      "[12:43:11] Tisch 1: Grußige Cowboys vs Halda gestartet.",
-      "[12:43:12] Tisch 3: Mario und Luigi gewinnt gegen Promille Athleten (3:0 Punkte, Cups +10/-10).",
-      "[12:43:12] Tisch 3: Notnagel vs Doktor Michi gestartet.",
-      "[12:43:28] Match bearbeitet: W01-03."
+      "[16:52:33] Neues Turnier gestartet.",
+      "[16:52:34] Welle 1 gestartet (12 Matches).",
+      "[16:52:34] Tisch 1: Montafon 2 vs Bauer Beni gestartet.",
+      "[16:52:34] Tisch 2: Die Becher Brüder vs Motafon 1 gestartet.",
+      "[16:52:34] Tisch 3: Mario und Luigi vs Promille Athleten gestartet.",
+      "[16:52:34] Tisch 4: Apex vs 69 Elite gestartet.",
+      "[16:52:51] B-Gruppe gestartet (6 Gruppenspiele).",
+      "[17:13:33] B-Gruppe: Gruppenspiel 2 gespeichert.",
+      "[17:13:37] B-Gruppe: Gruppenspiel 5 gespeichert.",
+      "[17:13:41] B-Gruppe: Gruppenspiel 1 gespeichert."
     ],
     "podium": [],
     "top4": [],
-    "last_save_ts": 1778755408.939378,
-    "last_save_label": "edit_match",
+    "b_group": {
+      "phase": "SETUP",
+      "match_counter": 1,
+      "teams": [],
+      "matches": {},
+      "podium": []
+    },
+    "last_save_ts": 1778771625.86499,
+    "last_save_label": "b_group_reset",
     "autosave_count": 6
   }
 }

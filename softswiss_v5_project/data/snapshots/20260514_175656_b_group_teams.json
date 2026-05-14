@@ -1,6 +1,6 @@
 {
-  "saved_at": "2026-05-14T17:57:15",
-  "label": "shutdown",
+  "saved_at": "2026-05-14T17:56:56",
+  "label": "b_group_teams",
   "state": {
     "phase": "SWISS",
     "started_at": 1778774189.889907,
@@ -670,14 +670,13 @@
       "[17:56:30] Tisch 2: Team 21 vs Team 22 gestartet.",
       "[17:56:30] Tisch 3: Team 19 vs Team 20 gestartet.",
       "[17:56:30] Tisch 4: Team 17 vs Team 18 gestartet.",
-      "[17:56:30] Tisch 5: Team 15 vs Team 16 gestartet.",
-      "[17:57:02] B-Gruppe gestartet (6 Gruppenspiele)."
+      "[17:56:30] Tisch 5: Team 15 vs Team 16 gestartet."
     ],
     "podium": [],
     "top4": [],
     "b_group": {
-      "phase": "ROUND_ROBIN",
-      "match_counter": 7,
+      "phase": "SETUP",
+      "match_counter": 1,
       "teams": [
         {
           "id": 1,
@@ -720,96 +719,11 @@
           "games_played": 0
         }
       ],
-      "matches": {
-        "B-0001": {
-          "match_id": "B-0001",
-          "stage": "ROUND_ROBIN",
-          "label": "Runde 1 - Spiel 1",
-          "team_a": 1,
-          "team_b": 2,
-          "table_label": "Tisch 5",
-          "status": "pending",
-          "winner": null,
-          "loser": null,
-          "points_a": null,
-          "points_b": null,
-          "loser_cups_hit": null
-        },
-        "B-0002": {
-          "match_id": "B-0002",
-          "stage": "ROUND_ROBIN",
-          "label": "Runde 1 - Spiel 2",
-          "team_a": 3,
-          "team_b": 4,
-          "table_label": "Tisch 5",
-          "status": "pending",
-          "winner": null,
-          "loser": null,
-          "points_a": null,
-          "points_b": null,
-          "loser_cups_hit": null
-        },
-        "B-0003": {
-          "match_id": "B-0003",
-          "stage": "ROUND_ROBIN",
-          "label": "Runde 2 - Spiel 1",
-          "team_a": 1,
-          "team_b": 3,
-          "table_label": "Tisch 5",
-          "status": "pending",
-          "winner": null,
-          "loser": null,
-          "points_a": null,
-          "points_b": null,
-          "loser_cups_hit": null
-        },
-        "B-0004": {
-          "match_id": "B-0004",
-          "stage": "ROUND_ROBIN",
-          "label": "Runde 2 - Spiel 2",
-          "team_a": 2,
-          "team_b": 4,
-          "table_label": "Tisch 5",
-          "status": "pending",
-          "winner": null,
-          "loser": null,
-          "points_a": null,
-          "points_b": null,
-          "loser_cups_hit": null
-        },
-        "B-0005": {
-          "match_id": "B-0005",
-          "stage": "ROUND_ROBIN",
-          "label": "Runde 3 - Spiel 1",
-          "team_a": 1,
-          "team_b": 4,
-          "table_label": "Tisch 5",
-          "status": "pending",
-          "winner": null,
-          "loser": null,
-          "points_a": null,
-          "points_b": null,
-          "loser_cups_hit": null
-        },
-        "B-0006": {
-          "match_id": "B-0006",
-          "stage": "ROUND_ROBIN",
-          "label": "Runde 3 - Spiel 2",
-          "team_a": 2,
-          "team_b": 3,
-          "table_label": "Tisch 5",
-          "status": "pending",
-          "winner": null,
-          "loser": null,
-          "points_a": null,
-          "points_b": null,
-          "loser_cups_hit": null
-        }
-      },
+      "matches": {},
       "podium": []
     },
-    "last_save_ts": 1778774235.794625,
-    "last_save_label": "shutdown",
-    "autosave_count": 4
+    "last_save_ts": 1778774216.90577,
+    "last_save_label": "b_group_teams",
+    "autosave_count": 2
   }
 }

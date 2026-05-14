@@ -1,9 +1,9 @@
 {
-  "saved_at": "2026-05-14T13:48:05",
-  "label": "undo_result",
+  "saved_at": "2026-05-14T17:38:54",
+  "label": "new_tournament",
   "state": {
     "phase": "SWISS",
-    "started_at": 1778759081.0126731,
+    "started_at": 1778773134.2517216,
     "match_counter": 13,
     "wave_index": 1,
     "teams": [
@@ -275,14 +275,12 @@
         "id": 23,
         "name": "Montafon 2",
         "seed": 23,
-        "swiss_points": 3,
-        "cups_metric": 5,
-        "swiss_games_played": 1,
-        "opponents": [
-          24
-        ],
-        "last_finish_ts": 1778759161.4461806,
-        "active_match_id": null,
+        "swiss_points": 0,
+        "cups_metric": 0,
+        "swiss_games_played": 0,
+        "opponents": [],
+        "last_finish_ts": 0.0,
+        "active_match_id": "W1-0001",
         "ko_seed": null
       },
       {
@@ -290,13 +288,11 @@
         "name": "Bauer Beni",
         "seed": 24,
         "swiss_points": 0,
-        "cups_metric": -5,
-        "swiss_games_played": 1,
-        "opponents": [
-          23
-        ],
-        "last_finish_ts": 1778759161.4461806,
-        "active_match_id": null,
+        "cups_metric": 0,
+        "swiss_games_played": 0,
+        "opponents": [],
+        "last_finish_ts": 0.0,
+        "active_match_id": "W1-0001",
         "ko_seed": null
       }
     ],
@@ -309,13 +305,13 @@
         "team_b": 24,
         "wave_index": 1,
         "wave_order": 1,
-        "status": "finished",
-        "winner": 23,
-        "loser": 24,
+        "status": "active",
+        "winner": null,
+        "loser": null,
         "is_overtime": false,
-        "loser_cups_hit": 5,
-        "started_ts": 1778759081.3501997,
-        "ended_ts": 1778759161.4461806,
+        "loser_cups_hit": null,
+        "started_ts": 1778773134.5844257,
+        "ended_ts": null,
         "point_cap_used": 2,
         "game_cap_used": 1,
         "slot_label": "W01-01",
@@ -342,7 +338,7 @@
         "loser": null,
         "is_overtime": false,
         "loser_cups_hit": null,
-        "started_ts": 1778759081.3502698,
+        "started_ts": 1778773134.5845027,
         "ended_ts": null,
         "point_cap_used": 2,
         "game_cap_used": 1,
@@ -370,7 +366,7 @@
         "loser": null,
         "is_overtime": false,
         "loser_cups_hit": null,
-        "started_ts": 1778759081.3503313,
+        "started_ts": 1778773134.5845687,
         "ended_ts": null,
         "point_cap_used": 2,
         "game_cap_used": 1,
@@ -398,7 +394,7 @@
         "loser": null,
         "is_overtime": false,
         "loser_cups_hit": null,
-        "started_ts": 1778759081.350387,
+        "started_ts": 1778773134.5846267,
         "ended_ts": null,
         "point_cap_used": 2,
         "game_cap_used": 1,
@@ -416,7 +412,7 @@
       "W1-0005": {
         "match_id": "W1-0005",
         "phase": "SWISS",
-        "table": 1,
+        "table": 5,
         "team_a": 15,
         "team_b": 16,
         "wave_index": 1,
@@ -426,7 +422,7 @@
         "loser": null,
         "is_overtime": false,
         "loser_cups_hit": null,
-        "started_ts": 1778759161.4463584,
+        "started_ts": 1778773134.5847118,
         "ended_ts": null,
         "point_cap_used": 2,
         "game_cap_used": 1,
@@ -639,14 +635,13 @@
       }
     },
     "active_tables": {
+      "1": "W1-0001",
       "2": "W1-0002",
       "3": "W1-0003",
       "4": "W1-0004",
-      "1": "W1-0005"
+      "5": "W1-0005"
     },
-    "completed_match_ids": [
-      "W1-0001"
-    ],
+    "completed_match_ids": [],
     "current_wave": {
       "wave_index": 1,
       "match_ids": [
@@ -663,28 +658,31 @@
         "W1-0011",
         "W1-0012"
       ],
-      "created_ts": 1778759081.3499932,
+      "created_ts": 1778773134.5839102,
       "status": "active"
     },
     "prepared_wave": null,
     "ko_slots": {},
     "logs": [
-      "[13:44:41] Neues Turnier gestartet.",
-      "[13:44:41] Welle 1 gestartet (12 Matches).",
-      "[13:44:41] Tisch 1: Montafon 2 vs Bauer Beni gestartet.",
-      "[13:44:41] Tisch 2: Die Becher Brüder vs Motafon 1 gestartet.",
-      "[13:44:41] Tisch 3: Mario und Luigi vs Promille Athleten gestartet.",
-      "[13:44:41] Tisch 4: Apex vs 69 Elite gestartet.",
-      "[13:46:01] Tisch 1: Montafon 2 gewinnt gegen Bauer Beni (3:0 Punkte, Cups +5/-5).",
-      "[13:46:01] Tisch 1: Grußige Cowboys vs Halda gestartet.",
-      "[13:47:13] Tisch 1: Halda gewinnt OT gegen Grußige Cowboys (2:1 Punkte, Cups +2/0).",
-      "[13:47:13] Tisch 1: Notnagel vs Doktor Michi gestartet.",
-      "[13:48:05] Letzte Eingabe zurueckgenommen: W01-05."
+      "[17:38:54] Neues Turnier gestartet.",
+      "[17:38:54] Welle 1 gestartet (12 Matches).",
+      "[17:38:54] Tisch 1: Montafon 2 vs Bauer Beni gestartet.",
+      "[17:38:54] Tisch 2: Die Becher Brüder vs Motafon 1 gestartet.",
+      "[17:38:54] Tisch 3: Mario und Luigi vs Promille Athleten gestartet.",
+      "[17:38:54] Tisch 4: Apex vs 69 Elite gestartet.",
+      "[17:38:54] Tisch 5: Grußige Cowboys vs Halda gestartet."
     ],
     "podium": [],
     "top4": [],
-    "last_save_ts": 1778759285.312742,
-    "last_save_label": "undo_result",
-    "autosave_count": 4
+    "b_group": {
+      "phase": "SETUP",
+      "match_counter": 1,
+      "teams": [],
+      "matches": {},
+      "podium": []
+    },
+    "last_save_ts": 1778773134.584785,
+    "last_save_label": "new_tournament",
+    "autosave_count": 1
   }
 }

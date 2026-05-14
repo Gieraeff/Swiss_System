@@ -1,9 +1,9 @@
 {
-  "saved_at": "2026-05-14T13:49:11",
-  "label": "edit_match",
+  "saved_at": "2026-05-14T16:52:51",
+  "label": "b_group_start",
   "state": {
     "phase": "SWISS",
-    "started_at": 1778759081.0126731,
+    "started_at": 1778770353.8326154,
     "match_counter": 13,
     "wave_index": 1,
     "teams": [
@@ -160,7 +160,7 @@
         "swiss_games_played": 0,
         "opponents": [],
         "last_finish_ts": 0.0,
-        "active_match_id": "W1-0006",
+        "active_match_id": null,
         "ko_seed": null
       },
       {
@@ -172,7 +172,7 @@
         "swiss_games_played": 0,
         "opponents": [],
         "last_finish_ts": 0.0,
-        "active_match_id": "W1-0006",
+        "active_match_id": null,
         "ko_seed": null
       },
       {
@@ -180,12 +180,10 @@
         "name": "Grußige Cowboys",
         "seed": 15,
         "swiss_points": 0,
-        "cups_metric": -1,
-        "swiss_games_played": 1,
-        "opponents": [
-          16
-        ],
-        "last_finish_ts": 1778759312.8812037,
+        "cups_metric": 0,
+        "swiss_games_played": 0,
+        "opponents": [],
+        "last_finish_ts": 0.0,
         "active_match_id": null,
         "ko_seed": null
       },
@@ -193,13 +191,11 @@
         "id": 16,
         "name": "Halda",
         "seed": 16,
-        "swiss_points": 3,
-        "cups_metric": 1,
-        "swiss_games_played": 1,
-        "opponents": [
-          15
-        ],
-        "last_finish_ts": 1778759312.8812037,
+        "swiss_points": 0,
+        "cups_metric": 0,
+        "swiss_games_played": 0,
+        "opponents": [],
+        "last_finish_ts": 0.0,
         "active_match_id": null,
         "ko_seed": null
       },
@@ -279,14 +275,12 @@
         "id": 23,
         "name": "Montafon 2",
         "seed": 23,
-        "swiss_points": 3,
-        "cups_metric": 5,
-        "swiss_games_played": 1,
-        "opponents": [
-          24
-        ],
-        "last_finish_ts": 1778759161.4461806,
-        "active_match_id": null,
+        "swiss_points": 0,
+        "cups_metric": 0,
+        "swiss_games_played": 0,
+        "opponents": [],
+        "last_finish_ts": 0.0,
+        "active_match_id": "W1-0001",
         "ko_seed": null
       },
       {
@@ -294,13 +288,11 @@
         "name": "Bauer Beni",
         "seed": 24,
         "swiss_points": 0,
-        "cups_metric": -5,
-        "swiss_games_played": 1,
-        "opponents": [
-          23
-        ],
-        "last_finish_ts": 1778759161.4461806,
-        "active_match_id": null,
+        "cups_metric": 0,
+        "swiss_games_played": 0,
+        "opponents": [],
+        "last_finish_ts": 0.0,
+        "active_match_id": "W1-0001",
         "ko_seed": null
       }
     ],
@@ -313,13 +305,13 @@
         "team_b": 24,
         "wave_index": 1,
         "wave_order": 1,
-        "status": "finished",
-        "winner": 23,
-        "loser": 24,
+        "status": "active",
+        "winner": null,
+        "loser": null,
         "is_overtime": false,
-        "loser_cups_hit": 5,
-        "started_ts": 1778759081.3501997,
-        "ended_ts": 1778759161.4461806,
+        "loser_cups_hit": null,
+        "started_ts": 1778770354.1869237,
+        "ended_ts": null,
         "point_cap_used": 2,
         "game_cap_used": 1,
         "slot_label": "W01-01",
@@ -346,7 +338,7 @@
         "loser": null,
         "is_overtime": false,
         "loser_cups_hit": null,
-        "started_ts": 1778759081.3502698,
+        "started_ts": 1778770354.186997,
         "ended_ts": null,
         "point_cap_used": 2,
         "game_cap_used": 1,
@@ -374,7 +366,7 @@
         "loser": null,
         "is_overtime": false,
         "loser_cups_hit": null,
-        "started_ts": 1778759081.3503313,
+        "started_ts": 1778770354.1870606,
         "ended_ts": null,
         "point_cap_used": 2,
         "game_cap_used": 1,
@@ -402,7 +394,7 @@
         "loser": null,
         "is_overtime": false,
         "loser_cups_hit": null,
-        "started_ts": 1778759081.350387,
+        "started_ts": 1778770354.1871169,
         "ended_ts": null,
         "point_cap_used": 2,
         "game_cap_used": 1,
@@ -420,18 +412,18 @@
       "W1-0005": {
         "match_id": "W1-0005",
         "phase": "SWISS",
-        "table": 1,
+        "table": null,
         "team_a": 15,
         "team_b": 16,
         "wave_index": 1,
         "wave_order": 5,
-        "status": "finished",
-        "winner": 16,
-        "loser": 15,
+        "status": "pending",
+        "winner": null,
+        "loser": null,
         "is_overtime": false,
-        "loser_cups_hit": 9,
-        "started_ts": 1778759161.4463584,
-        "ended_ts": 1778759312.8812037,
+        "loser_cups_hit": null,
+        "started_ts": 0.0,
+        "ended_ts": null,
         "point_cap_used": 2,
         "game_cap_used": 1,
         "slot_label": "W01-05",
@@ -448,17 +440,17 @@
       "W1-0006": {
         "match_id": "W1-0006",
         "phase": "SWISS",
-        "table": 1,
+        "table": null,
         "team_a": 13,
         "team_b": 14,
         "wave_index": 1,
         "wave_order": 6,
-        "status": "active",
+        "status": "pending",
         "winner": null,
         "loser": null,
         "is_overtime": false,
         "loser_cups_hit": null,
-        "started_ts": 1778759312.8813717,
+        "started_ts": 0.0,
         "ended_ts": null,
         "point_cap_used": 2,
         "game_cap_used": 1,
@@ -643,15 +635,12 @@
       }
     },
     "active_tables": {
+      "1": "W1-0001",
       "2": "W1-0002",
       "3": "W1-0003",
-      "4": "W1-0004",
-      "1": "W1-0006"
+      "4": "W1-0004"
     },
-    "completed_match_ids": [
-      "W1-0001",
-      "W1-0005"
-    ],
+    "completed_match_ids": [],
     "current_wave": {
       "wave_index": 1,
       "match_ids": [
@@ -668,31 +657,147 @@
         "W1-0011",
         "W1-0012"
       ],
-      "created_ts": 1778759081.3499932,
+      "created_ts": 1778770354.1865048,
       "status": "active"
     },
     "prepared_wave": null,
     "ko_slots": {},
     "logs": [
-      "[13:44:41] Neues Turnier gestartet.",
-      "[13:44:41] Welle 1 gestartet (12 Matches).",
-      "[13:44:41] Tisch 1: Montafon 2 vs Bauer Beni gestartet.",
-      "[13:44:41] Tisch 2: Die Becher Brüder vs Motafon 1 gestartet.",
-      "[13:44:41] Tisch 3: Mario und Luigi vs Promille Athleten gestartet.",
-      "[13:44:41] Tisch 4: Apex vs 69 Elite gestartet.",
-      "[13:46:01] Tisch 1: Montafon 2 gewinnt gegen Bauer Beni (3:0 Punkte, Cups +5/-5).",
-      "[13:46:01] Tisch 1: Grußige Cowboys vs Halda gestartet.",
-      "[13:47:13] Tisch 1: Halda gewinnt OT gegen Grußige Cowboys (2:1 Punkte, Cups +2/0).",
-      "[13:47:13] Tisch 1: Notnagel vs Doktor Michi gestartet.",
-      "[13:48:05] Letzte Eingabe zurueckgenommen: W01-05.",
-      "[13:48:32] Tisch 1: Halda gewinnt gegen Grußige Cowboys (3:0 Punkte, Cups +2/-2).",
-      "[13:48:32] Tisch 1: Notnagel vs Doktor Michi gestartet.",
-      "[13:49:11] Match bearbeitet: W01-05."
+      "[16:52:33] Neues Turnier gestartet.",
+      "[16:52:34] Welle 1 gestartet (12 Matches).",
+      "[16:52:34] Tisch 1: Montafon 2 vs Bauer Beni gestartet.",
+      "[16:52:34] Tisch 2: Die Becher Brüder vs Motafon 1 gestartet.",
+      "[16:52:34] Tisch 3: Mario und Luigi vs Promille Athleten gestartet.",
+      "[16:52:34] Tisch 4: Apex vs 69 Elite gestartet.",
+      "[16:52:51] B-Gruppe gestartet (6 Gruppenspiele)."
     ],
     "podium": [],
     "top4": [],
-    "last_save_ts": 1778759351.426203,
-    "last_save_label": "edit_match",
-    "autosave_count": 6
+    "b_group": {
+      "phase": "ROUND_ROBIN",
+      "match_counter": 7,
+      "teams": [
+        {
+          "id": 1,
+          "name": "Josef",
+          "seed": 1,
+          "points": 0,
+          "wins": 0,
+          "losses": 0,
+          "games_played": 0
+        },
+        {
+          "id": 2,
+          "name": "gudrun",
+          "seed": 2,
+          "points": 0,
+          "wins": 0,
+          "losses": 0,
+          "games_played": 0
+        },
+        {
+          "id": 3,
+          "name": "josefine",
+          "seed": 3,
+          "points": 0,
+          "wins": 0,
+          "losses": 0,
+          "games_played": 0
+        },
+        {
+          "id": 4,
+          "name": "Daisy",
+          "seed": 4,
+          "points": 0,
+          "wins": 0,
+          "losses": 0,
+          "games_played": 0
+        }
+      ],
+      "matches": {
+        "B-0001": {
+          "match_id": "B-0001",
+          "stage": "ROUND_ROBIN",
+          "label": "Gruppenspiel 1",
+          "team_a": 1,
+          "team_b": 2,
+          "table_label": "Tisch 5",
+          "status": "pending",
+          "winner": null,
+          "loser": null,
+          "points_a": null,
+          "points_b": null
+        },
+        "B-0002": {
+          "match_id": "B-0002",
+          "stage": "ROUND_ROBIN",
+          "label": "Gruppenspiel 2",
+          "team_a": 1,
+          "team_b": 3,
+          "table_label": "Tisch 5",
+          "status": "pending",
+          "winner": null,
+          "loser": null,
+          "points_a": null,
+          "points_b": null
+        },
+        "B-0003": {
+          "match_id": "B-0003",
+          "stage": "ROUND_ROBIN",
+          "label": "Gruppenspiel 3",
+          "team_a": 1,
+          "team_b": 4,
+          "table_label": "Tisch 5",
+          "status": "pending",
+          "winner": null,
+          "loser": null,
+          "points_a": null,
+          "points_b": null
+        },
+        "B-0004": {
+          "match_id": "B-0004",
+          "stage": "ROUND_ROBIN",
+          "label": "Gruppenspiel 4",
+          "team_a": 2,
+          "team_b": 3,
+          "table_label": "Tisch 5",
+          "status": "pending",
+          "winner": null,
+          "loser": null,
+          "points_a": null,
+          "points_b": null
+        },
+        "B-0005": {
+          "match_id": "B-0005",
+          "stage": "ROUND_ROBIN",
+          "label": "Gruppenspiel 5",
+          "team_a": 2,
+          "team_b": 4,
+          "table_label": "Tisch 5",
+          "status": "pending",
+          "winner": null,
+          "loser": null,
+          "points_a": null,
+          "points_b": null
+        },
+        "B-0006": {
+          "match_id": "B-0006",
+          "stage": "ROUND_ROBIN",
+          "label": "Gruppenspiel 6",
+          "team_a": 3,
+          "team_b": 4,
+          "table_label": "Tisch 5",
+          "status": "pending",
+          "winner": null,
+          "loser": null,
+          "points_a": null,
+          "points_b": null
+        }
+      },
+      "podium": []
+    },
+    "last_save_ts": 1778770371.721457,
+    "last_save_label": "b_group_start",
+    "autosave_count": 2
   }
 }
