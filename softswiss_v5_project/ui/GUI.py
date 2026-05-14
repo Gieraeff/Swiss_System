@@ -3,12 +3,14 @@ from __future__ import annotations
 import hashlib
 import json
 import tkinter as tk
+import ctypes
+from ctypes import wintypes
 from tkinter import messagebox, ttk
 from turtle import right
 from typing import List, Optional
 
 from core.backup import BackupManager
-from core.config import APP_TITLE, PUBLIC_THEME, SWISS_GAMES_PER_TEAM, TEAM_COUNT, TOP_CUT
+from core.config import APP_TITLE, B_GROUP_TABLE_LABEL, B_GROUP_TEAM_COUNT, PUBLIC_THEME, SWISS_GAMES_PER_TEAM, TEAM_COUNT, TOP_CUT
 from core.models import TournamentState
 from core.Swiss import SwissTournamentEngine
 
@@ -25,6 +27,7 @@ class TournamentGUI:
         self.player_window: Optional[tk.Toplevel] = None
         self.player_body: Optional[tk.Frame] = None
         self.player_fullscreen = False
+        self.player_windowed_geometry = "1680x980"
         self._refresh_pending = False
         self._last_render_hash: Optional[str] = None
         self._last_player_render_hash: Optional[str] = None
@@ -46,6 +49,16 @@ class TournamentGUI:
         self.fill_button: Optional[ttk.Button] = None
         self.save_now_button: Optional[ttk.Button] = None
         self.recompute_button: Optional[ttk.Button] = None
+        self.b_group_team_text: Optional[tk.Text] = None
+        self.b_group_match_var = tk.StringVar()
+        self.b_group_winner_var = tk.StringVar()
+        self.b_group_table_var = tk.StringVar(value=B_GROUP_TABLE_LABEL)
+        self.b_group_loser_cups_var = tk.StringVar(value="0")
+        self.b_group_next_var = tk.StringVar(value="B-Gruppe noch nicht gestartet.")
+        self.b_group_ranking_tree: Optional[ttk.Treeview] = None
+        self.b_group_matches_tree: Optional[ttk.Treeview] = None
+        self.b_group_match_combo: Optional[ttk.Combobox] = None
+        self.b_group_winner_combo: Optional[ttk.Combobox] = None
 
         self.setup_widgets()
         self.refresh_all(force=True)
@@ -241,14 +254,17 @@ class TournamentGUI:
         self.control_tab = ttk.Frame(notebook, padding=12)
         self.ranking_tab = ttk.Frame(notebook, padding=12)
         self.backup_tab = ttk.Frame(notebook, padding=12)
+        self.b_group_tab = ttk.Frame(notebook, padding=12)
         notebook.add(self.setup_tab, text="Setup")
         notebook.add(self.control_tab, text="Turnierleitung")
         notebook.add(self.ranking_tab, text="Live-Ranking")
+        notebook.add(self.b_group_tab, text="B-Gruppe")
         notebook.add(self.backup_tab, text="Backup")
 
         self._build_setup_tab()
         self._build_control_tab()
         self._build_Live_Ranking_tab()
+        self._build_b_group_tab()
         self._build_backup_tab()
 
     def _build_setup_tab(self) -> None:
@@ -289,7 +305,7 @@ class TournamentGUI:
         ranking_shell, ranking_frame = self._admin_card(
             self.ranking_tab,
             "Live-Ranking",
-            "Punkte, Cups, Buchholz und Spiele",
+            "Punkte = Siegpunkte, Cups = Differenz zwischen den Getroffenen Cups, Buchholz = Summe der Punkte der Gegner höhere punkte stärkere gegner gehabt und Spiele = Anzahl gespielter Spiele (maximal 5 in der Swiss-Phase).",
             padding=(18, 16),
         )
         ranking_shell.pack(fill="both", expand=True)
@@ -475,12 +491,143 @@ class TournamentGUI:
         )
         self.backup_info.pack(fill="both", expand=True)
 
+    def _build_b_group_tab(self) -> None:
+        shell = ttk.Frame(self.b_group_tab, padding=6)
+        shell.pack(fill="both", expand=True)
+        header = ttk.Frame(shell)
+        header.pack(fill="x", pady=(0, 12))
+        ttk.Label(header, text="B-Gruppe", style="Header.TLabel").pack(side="left")
+        ttk.Label(header, text="4 Teams, jeder gegen jeden, danach 1-4 und 2-3 im KO", style="Muted.TLabel").pack(side="left", padx=(14, 0))
+
+        pane = ttk.Panedwindow(shell, orient="horizontal")
+        pane.pack(fill="both", expand=True)
+        left, left_body = self._scrollable_admin_column(pane, padding=(0, 0, 10, 0))
+        right, right_body = self._scrollable_admin_column(pane, padding=(10, 0, 0, 0))
+        pane.add(left, weight=2)
+        pane.add(right, weight=3)
+
+        teams_shell, teams_card = self._admin_card(left_body, "Teams", f"Genau {B_GROUP_TEAM_COUNT} Teams. Namen vor dem Start bearbeiten.")
+        teams_shell.pack(fill="x", pady=(0, 12))
+        self.b_group_team_text = tk.Text(
+            teams_card,
+            height=6,
+            font=("Consolas", 11),
+            relief="flat",
+            borderwidth=0,
+            bg=PUBLIC_THEME["surface"],
+            fg=PUBLIC_THEME["text"],
+            insertbackground=PUBLIC_THEME["accent_dark"],
+            selectbackground=PUBLIC_THEME["accent_soft"],
+            padx=12,
+            pady=10,
+            highlightthickness=1,
+            highlightbackground=PUBLIC_THEME["line_soft"],
+        )
+        self.b_group_team_text.pack(fill="x", pady=(0, 10))
+        team_buttons = tk.Frame(teams_card, bg=PUBLIC_THEME["card"])
+        team_buttons.pack(fill="x")
+        ttk.Button(team_buttons, text="Teams übernehmen", command=self.save_b_group_teams_from_gui).pack(side="left", padx=(0, 8))
+        ttk.Button(team_buttons, text="B-Gruppe starten", command=self.start_b_group_from_gui, style="Primary.TButton").pack(side="left", padx=(0, 8))
+        ttk.Button(team_buttons, text="Zurücksetzen", command=self.reset_b_group_from_gui).pack(side="left")
+
+        next_shell, next_card = self._admin_card(left_body, "Next Match", "Nächstes B-Gruppen-Spiel")
+        next_shell.pack(fill="x", pady=(0, 12))
+        tk.Label(
+            next_card,
+            textvariable=self.b_group_next_var,
+            bg=PUBLIC_THEME["card"],
+            fg=PUBLIC_THEME["text"],
+            font=("Segoe UI", 15, "bold"),
+            justify="left",
+            anchor="w",
+        ).pack(fill="x", anchor="w")
+
+        result_shell, result_card = self._admin_card(left_body, "Ergebnis eintragen", "Sieger wählen und nur Verlierer-Becher eintragen")
+        result_shell.pack(fill="x", pady=(0, 12))
+        result_card.columnconfigure(1, weight=1)
+        ttk.Label(result_card, text="Match", style="Card.TLabel").grid(row=0, column=0, sticky="w", padx=(0, 10), pady=(0, 8))
+        self.b_group_match_combo = ttk.Combobox(result_card, textvariable=self.b_group_match_var, state="readonly")
+        self.b_group_match_combo.grid(row=0, column=1, columnspan=3, sticky="ew", pady=(0, 8))
+        self.b_group_match_combo.bind("<<ComboboxSelected>>", lambda _event: self._refresh_b_group_match_inputs())
+
+        ttk.Label(result_card, text="Sieger", style="Card.TLabel").grid(row=1, column=0, sticky="w", padx=(0, 10), pady=(0, 8))
+        self.b_group_winner_combo = ttk.Combobox(result_card, textvariable=self.b_group_winner_var, state="readonly")
+        self.b_group_winner_combo.grid(row=1, column=1, columnspan=3, sticky="ew", pady=(0, 8))
+
+        ttk.Label(result_card, text="Tisch", style="Card.TLabel").grid(row=2, column=0, sticky="w", padx=(0, 10), pady=(0, 8))
+        ttk.Label(result_card, textvariable=self.b_group_table_var, style="CardTitle.TLabel").grid(row=2, column=1, sticky="w", pady=(0, 8))
+        ttk.Label(result_card, text="Verlierer-Becher", style="Card.TLabel").grid(row=2, column=2, sticky="w", padx=(14, 10), pady=(0, 8))
+        ttk.Spinbox(result_card, textvariable=self.b_group_loser_cups_var, from_=0, to=9, width=6).grid(row=2, column=3, sticky="w", pady=(0, 8))
+
+        ttk.Button(result_card, text="Ergebnis speichern", command=self.submit_b_group_result_from_gui, style="Action.TButton").grid(
+            row=3,
+            column=0,
+            columnspan=4,
+            sticky="ew",
+            pady=(10, 0),
+        )
+        ttk.Button(result_card, text="Fertiges Ergebnis bearbeiten", command=self.edit_b_group_result_from_gui).grid(
+            row=4,
+            column=0,
+            columnspan=4,
+            sticky="ew",
+            pady=(8, 0),
+        )
+
+        ranking_shell, ranking_card = self._admin_card(right_body, "Aktuelle Tabelle", "B-Gruppe Punkte und Bilanz")
+        ranking_shell.pack(fill="both", expand=False, pady=(0, 12))
+        self.b_group_ranking_tree = ttk.Treeview(
+            ranking_card,
+            columns=("rank", "team", "points", "cups", "wins", "losses", "games"),
+            show="headings",
+            height=5,
+        )
+        for col, title, width in [
+            ("rank", "#", 45),
+            ("team", "Team", 260),
+            ("points", "Pkt", 70),
+            ("cups", "Cups", 70),
+            ("wins", "S", 55),
+            ("losses", "N", 55),
+            ("games", "Spiele", 70),
+        ]:
+            self.b_group_ranking_tree.heading(col, text=title)
+            self.b_group_ranking_tree.column(col, width=width, anchor="center")
+        self._style_tree_tags(self.b_group_ranking_tree)
+        self.b_group_ranking_tree.pack(fill="x")
+
+        matches_shell, matches_card = self._admin_card(right_body, "Matchplan", "Round Robin, Halbfinals, Platz 3 und Finale")
+        matches_shell.pack(fill="both", expand=True)
+        self.b_group_matches_tree = ttk.Treeview(
+            matches_card,
+            columns=("label", "table", "team_a", "team_b", "status", "winner", "points", "loser_cups"),
+            show="headings",
+            height=14,
+        )
+        for col, title, width in [
+            ("label", "Match", 135),
+            ("table", "Tisch", 95),
+            ("team_a", "Team A", 190),
+            ("team_b", "Team B", 190),
+            ("status", "Status", 90),
+            ("winner", "Sieger", 180),
+            ("points", "Pkt", 70),
+            ("loser_cups", "V-Becher", 80),
+        ]:
+            self.b_group_matches_tree.heading(col, text=title)
+            self.b_group_matches_tree.column(col, width=width, anchor="center")
+        self._style_tree_tags(self.b_group_matches_tree)
+        self.b_group_matches_tree.pack(fill="both", expand=True)
+
+        self._refresh_b_group_admin()
+
     def _build_player_window(self) -> None:
         self.player_window = tk.Toplevel(self.root)
         self.player_window.title("Spieleranzeige")
-        self.player_window.geometry("1680x980")
+        self.player_window.geometry(self.player_windowed_geometry)
         self.player_window.configure(bg=PUBLIC_THEME["bg"])
         self.player_window.protocol("WM_DELETE_WINDOW", self.player_window.withdraw)
+        self.player_window.bind("<Escape>", lambda _event: self.exit_player_fullscreen())
 
         self.player_header = tk.Frame(self.player_window, bg=PUBLIC_THEME["bg"], padx=28, pady=18)
         self.player_header.pack(fill="x")
@@ -553,6 +700,7 @@ class TournamentGUI:
         self._refresh_preview_tree()
         self._refresh_action_states()
         self._refresh_backup_info()
+        self._refresh_b_group_admin()
         self._refresh_player_view(force=force)
 
 
@@ -686,14 +834,115 @@ class TournamentGUI:
         self.backup_info.insert("1.0", "\n".join(content))
         self.backup_info.configure(state="disabled")
 
+    def _b_group_selected_match_id(self) -> Optional[str]:
+        value = self.b_group_match_var.get()
+        if not value or "|" not in value:
+            return None
+        return value.split("|", 1)[0].strip()
+
+    def _refresh_b_group_match_inputs(self) -> None:
+        match_id = self._b_group_selected_match_id()
+        winners: List[str] = []
+        if match_id:
+            match = self.engine.state.b_group.matches.get(match_id)
+            if match:
+                winners = [self.engine.b_group_team_name(match.team_a), self.engine.b_group_team_name(match.team_b)]
+                self.b_group_table_var.set(self.engine.b_group_table_status())
+        if self.b_group_winner_combo is not None:
+            self.b_group_winner_combo["values"] = winners
+        if winners and self.b_group_winner_var.get() not in winners:
+            self.b_group_winner_var.set(winners[0])
+        if not winners:
+            self.b_group_winner_var.set("")
+            self.b_group_table_var.set(self.engine.b_group_table_status())
+
+    def _refresh_b_group_admin(self) -> None:
+        if (
+            self.b_group_team_text is None
+            or self.b_group_ranking_tree is None
+            or self.b_group_matches_tree is None
+        ):
+            return
+
+        if self.b_group_team_text is not None and self.b_group_team_text.focus_get() is not self.b_group_team_text:
+            self.b_group_team_text.delete("1.0", "end")
+            self.b_group_team_text.insert("1.0", self.engine.b_group_team_names_text())
+
+        next_match = self.engine.b_group_next_match()
+        if next_match:
+            status_text = next_match.get("status_text", next_match["status"])
+            self.b_group_next_var.set(
+                f"{next_match['label']}\n{next_match['table']}\n"
+                f"{next_match['team_a']} vs {next_match['team_b']}\n"
+                f"Status: {status_text} | {self.engine.b_group_table_status()}"
+            )
+        elif self.engine.state.b_group.phase == "SETUP":
+            self.b_group_next_var.set("B-Gruppe noch nicht gestartet.")
+        elif self.engine.state.b_group.phase == "FINISHED":
+            self.b_group_next_var.set("B-Gruppe beendet.")
+        elif self.engine.b_group_active_match() is not None:
+            self.b_group_next_var.set(f"Aktuelles B-Gruppen-Spiel läuft.\n{self.engine.b_group_table_status()}\nKein weiteres Spiel bereit.")
+        else:
+            self.b_group_next_var.set("Alle aktuellen B-Gruppen-Spiele sind erledigt.")
+
+        if self.b_group_ranking_tree is not None:
+            for item in self.b_group_ranking_tree.get_children():
+                self.b_group_ranking_tree.delete(item)
+            for row in self.engine.b_group_ranking_rows():
+                self.b_group_ranking_tree.insert(
+                    "",
+                    "end",
+                    values=(row["rank"], row["name"], row["points"], row["cups"], row["wins"], row["losses"], row["games"]),
+                    tags=("top8",) if row["rank"] <= 2 else (),
+                )
+
+        rows = self.engine.b_group_match_rows()
+        if self.b_group_matches_tree is not None:
+            for item in self.b_group_matches_tree.get_children():
+                self.b_group_matches_tree.delete(item)
+            for row in rows:
+                tag = "finished" if row["status"] == "finished" else "active" if row["status"] == "active" else "ready"
+                self.b_group_matches_tree.insert(
+                    "",
+                    "end",
+                    values=(
+                        row["label"],
+                        row["table"],
+                        row["team_a"],
+                        row["team_b"],
+                        row.get("status_text", row["status"]),
+                        row["winner"],
+                        row["points"],
+                        row["loser_cups"],
+                    ),
+                    tags=(tag,),
+                )
+
+        pending_rows = [row for row in rows if row["status"] != "finished"]
+        values = [
+            f"{row['match_id']} | {row['label']} | {row['team_a']} vs {row['team_b']} | {row.get('status_text', row['status'])}"
+            for row in pending_rows
+        ]
+        if self.b_group_match_combo is not None:
+            self.b_group_match_combo["values"] = values
+        if values and self.b_group_match_var.get() not in values:
+            self.b_group_match_var.set(values[0])
+        if not values:
+            self.b_group_match_var.set("")
+        self._refresh_b_group_match_inputs()
+
     def _player_render_hash(self) -> str:
         payload = {
             "phase": self.engine.state.phase,
             "phase_label": self.engine.phase_label(),
             "progress": self.engine.progress_text(),
-            "active": self.engine.active_matches_rows(),
+            "active": self.engine.active_matches_rows(include_b_group=True, include_waiting=True),
             "preview": self.engine.preview_matches(),
             "ranking": self.engine.ranking_rows(),
+            "b_group_next": self.engine.b_group_next_match(),
+            "b_group_table": self.engine.b_group_table_status(),
+            "b_group_ranking": self.engine.b_group_ranking_rows(),
+            "b_group_phase": self.engine.state.b_group.phase,
             "knockout": self.engine.knockout_rows() if self.engine.state.phase in {"KO", "FINISHED"} else [],
             "podium": self.engine.state.podium,
         }
@@ -808,18 +1057,115 @@ class TournamentGUI:
                 anchor="e",
             ).pack(side="left", padx=(12, 0))
 
+    def _render_player_b_next_card(self, parent: tk.Widget, row: int, column: int) -> None:
+        next_match = self.engine.b_group_next_match()
+        subtitle = "Eigenes Turnier" if self.engine.state.b_group.phase == "SETUP" else "Nächstes Spiel"
+        shell, card = self._public_card(parent, "B-Gruppe", subtitle, hero=True)
+        shell.grid(row=row, column=column, sticky="nsew", padx=(14, 0), pady=(0, 14))
+
+        if next_match:
+            status_text = next_match.get("status_text", next_match["status"])
+            tk.Label(
+                card,
+                text=f"{next_match['table']} | {status_text}",
+                bg=PUBLIC_THEME["highlight_soft"],
+                fg=PUBLIC_THEME["accent_dark"],
+                font=("Segoe UI", 18, "bold"),
+                anchor="w",
+            ).pack(fill="x", anchor="w")
+            tk.Label(
+                card,
+                text=f"{self._shorten(next_match['team_a'], 26)}  vs  {self._shorten(next_match['team_b'], 26)}",
+                bg=PUBLIC_THEME["highlight_soft"],
+                fg=PUBLIC_THEME["text"],
+                font=("Segoe UI", 30, "bold"),
+                anchor="w",
+                wraplength=900,
+                justify="left",
+            ).pack(fill="x", anchor="w", pady=(10, 2))
+            tk.Label(
+                card,
+                text=f"{next_match['label']} | {self.engine.b_group_table_status()}",
+                bg=PUBLIC_THEME["highlight_soft"],
+                fg=PUBLIC_THEME["muted"],
+                font=("Segoe UI", 14, "bold"),
+                anchor="w",
+            ).pack(fill="x", anchor="w")
+            return
+
+        status = "B-Gruppe noch nicht gestartet."
+        if self.engine.state.b_group.phase == "FINISHED":
+            status = "B-Gruppe beendet."
+        elif self.engine.b_group_active_match() is not None:
+            status = "Aktuelles B-Spiel läuft. Danach folgt kein weiteres offenes Spiel."
+        elif self.engine.state.b_group.phase != "SETUP":
+            status = "Alle B-Gruppen-Spiele sind erledigt."
+        tk.Label(
+            card,
+            text=status,
+            bg=PUBLIC_THEME["highlight_soft"],
+            fg=PUBLIC_THEME["text"],
+            font=("Segoe UI", 24, "bold"),
+            anchor="w",
+            wraplength=900,
+            justify="left",
+        ).pack(fill="x", anchor="w")
+
+    def _render_player_b_group_section(self, parent: tk.Widget) -> None:
+        tk.Frame(parent, bg=PUBLIC_THEME["line_soft"], height=1).pack(fill="x", pady=(8, 10))
+        tk.Label(
+            parent,
+            text="B-Gruppe",
+            bg=PUBLIC_THEME["card"],
+            fg=PUBLIC_THEME["accent_dark"],
+            font=("Segoe UI", 16, "bold"),
+            anchor="w",
+        ).pack(fill="x", anchor="w")
+
+        rows = self.engine.b_group_ranking_rows()
+        if not rows:
+            tk.Label(
+                parent,
+                text="B-Gruppen-Tabelle erscheint nach dem Start.",
+                bg=PUBLIC_THEME["card"],
+                fg=PUBLIC_THEME["muted"],
+                font=("Segoe UI", 13, "bold"),
+                anchor="w",
+            ).pack(fill="x", anchor="w", pady=(8, 0))
+            return
+
+        grid = tk.Frame(parent, bg=PUBLIC_THEME["card"])
+        grid.pack(fill="x", pady=(8, 0))
+        for col in range(min(4, len(rows))):
+            grid.grid_columnconfigure(col, weight=1, uniform="bgroup")
+        for col, row in enumerate(rows):
+            bg = PUBLIC_THEME["top8"] if row["rank"] <= 2 else PUBLIC_THEME["row_alt"]
+            frame = tk.Frame(grid, bg=bg, padx=12, pady=10)
+            frame.grid(row=0, column=col, sticky="ew", padx=(0 if col == 0 else 8, 0))
+            tk.Label(frame, text=f"#{row['rank']}", bg=bg, fg=PUBLIC_THEME["accent_dark"], font=("Segoe UI", 14, "bold")).pack(anchor="w")
+            tk.Label(frame, text=self._shorten(row["name"], 24), bg=bg, fg=PUBLIC_THEME["text"], font=("Segoe UI", 14, "bold"), anchor="w").pack(fill="x")
+            tk.Label(
+                frame,
+                text=f"{row['points']} Pkt | {row['cups']} Cups | {row['games']} Spiele",
+                bg=bg,
+                fg=PUBLIC_THEME["text_soft"],
+                font=("Segoe UI", 11, "bold"),
+                anchor="w",
+            ).pack(fill="x", pady=(5, 0))
+
     def _render_player_swiss_view(self) -> None:
         content = self.player_body
         if content is None:
             return
-        content.grid_columnconfigure(0, weight=1)
-        content.grid_columnconfigure(1, weight=0)
+        content.grid_columnconfigure(0, weight=3, uniform="hero")
+        content.grid_columnconfigure(1, weight=2, uniform="hero")
         content.grid_rowconfigure(0, weight=0)
         content.grid_rowconfigure(1, weight=0)
         content.grid_rowconfigure(2, weight=1)
 
         hero_shell, hero_card = self._public_card(content, "Next Match", self.engine.progress_text(), hero=True)
-        hero_shell.grid(row=0, column=0, sticky="ew", pady=(0, 14))
+        hero_shell.grid(row=0, column=0, sticky="nsew", pady=(0, 14))
+        self._render_player_b_next_card(content, 0, 1)
 
         preview = self.engine.preview_matches()
         if preview:
@@ -834,7 +1180,7 @@ class TournamentGUI:
             ).pack(fill="x", anchor="w")
             tk.Label(
                 hero_card,
-                text=first.get("status", "Wir bitten sie, sich Spielbereit zu halten. Die Firma Dankt für Ihr Verständnis."),
+                text=first.get("status", "Wir bitten Sie, sich Spielbereit und in Abrufnähe zu halten. Da Verein Dankt."),
                 bg=PUBLIC_THEME["highlight_soft"],
                 fg=PUBLIC_THEME["accent_dark"],
                 font=("Segoe UI", 16, "bold"),
@@ -847,19 +1193,20 @@ class TournamentGUI:
                     text=f"Danach: {self._shorten(second['team_a'], 28)} vs {self._shorten(second['team_b'], 28)}",
                     bg=PUBLIC_THEME["highlight_soft"],
                     fg=PUBLIC_THEME["muted"],
-                    font=("Segoe UI", 12, "bold"),
+                    font=("Segoe UI", 15, "bold"),
                     anchor="w",
-                ).pack(fill="x", anchor="w", pady=(10, 0))
+                ).pack(fill="x", anchor="w", pady=(12, 0))
         else:
-            active = self.engine.active_matches_rows()
-            title = "Alle Tische laufen" if active else "Noch kein Match bereit"
-            detail = "Neue Paarungen erscheinen, sobald ein Tisch frei wird." if active else "Sobald das Turnier gestartet ist, erscheint hier das nächste Match."
+            active = self.engine.active_matches_rows(include_b_group=True, include_waiting=True)
+            running = [row for row in active if row.get("phase") != "WAITING"]
+            title = "Alle Tische laufen" if running else "Wartet auf weitere Daten"
+            detail = "Neue Paarungen erscheinen, sobald genug Ergebnisse vorliegen." if active else "Sobald das Turnier gestartet ist, erscheint hier das nächste Match."
             tk.Label(hero_card, text=title, bg=PUBLIC_THEME["highlight_soft"], fg=PUBLIC_THEME["text"], font=("Segoe UI", 30, "bold"), anchor="w").pack(fill="x", anchor="w")
             tk.Label(hero_card, text=detail, bg=PUBLIC_THEME["highlight_soft"], fg=PUBLIC_THEME["muted"], font=("Segoe UI", 14), anchor="w").pack(fill="x", anchor="w", pady=(4, 0))
 
         live_shell, live_card = self._public_card(content, "Live an den Tischen")
-        live_shell.grid(row=1, column=0, sticky="ew", pady=(0, 14))
-        active = self.engine.active_matches_rows()
+        live_shell.grid(row=1, column=0, columnspan=2, sticky="ew", pady=(0, 14))
+        active = self.engine.active_matches_rows(include_b_group=True, include_waiting=True)
         if not active:
             tk.Label(live_card, text="Keine laufenden Spiele.", bg=PUBLIC_THEME["card"], fg=PUBLIC_THEME["muted"], font=("Segoe UI", 14)).pack(anchor="w")
         else:
@@ -867,48 +1214,55 @@ class TournamentGUI:
             live_grid.pack(fill="x")
             for idx, row in enumerate(active):
                 live_grid.grid_columnconfigure(idx, weight=1)
-                match_card = tk.Frame(live_grid, bg=PUBLIC_THEME["surface_alt"], padx=12, pady=10)
+                is_waiting = row.get("phase") == "WAITING"
+                card_bg = PUBLIC_THEME["warn_soft"] if is_waiting else PUBLIC_THEME["surface_alt"]
+                match_card = tk.Frame(live_grid, bg=card_bg, padx=12, pady=10)
                 match_card.grid(row=0, column=idx, sticky="ew", padx=(0 if idx == 0 else 8, 0))
-                tk.Label(match_card, text=f"T{row['table']}", bg=PUBLIC_THEME["surface_alt"], fg=PUBLIC_THEME["accent_dark"], font=("Segoe UI", 12, "bold")).pack(anchor="w")
+                table_title = f"Tisch {row['table']}"
+                if row.get("phase") == "B-GRUPPE":
+                    table_title = f"Tisch {row['table']} - B-Gruppe"
+                tk.Label(match_card, text=table_title, bg=card_bg, fg=PUBLIC_THEME["accent_dark"], font=("Segoe UI", 12, "bold")).pack(anchor="w")
+                text = row["team_a"] if is_waiting else f"{self._shorten(row['team_a'], 24)} vs {self._shorten(row['team_b'], 24)}"
                 tk.Label(
                     match_card,
-                    text=f"{self._shorten(row['team_a'], 24)} vs {self._shorten(row['team_b'], 24)}",
-                    bg=PUBLIC_THEME["surface_alt"],
-                    fg=PUBLIC_THEME["text"],
+                    text=text,
+                    bg=card_bg,
+                    fg=PUBLIC_THEME["muted"] if is_waiting else PUBLIC_THEME["text"],
                     font=("Segoe UI", 13, "bold"),
                     anchor="w",
                 ).pack(fill="x", anchor="w")
 
         ranking_shell, ranking_card = self._public_card(content, "Live Ranking", self.top_hint_var.get())
-        ranking_shell.grid(row=2, column=0, sticky="nsew")
+        ranking_shell.grid(row=2, column=0, columnspan=2, sticky="nsew")
         ranking_rows = self.engine.ranking_rows()
         if not ranking_rows:
             tk.Label(ranking_card, text="Ranking erscheint nach Turnierstart.", bg=PUBLIC_THEME["card"], fg=PUBLIC_THEME["muted"], font=("Segoe UI", 15)).pack(anchor="w")
-            return
-
-        ranking_grid = tk.Frame(ranking_card, bg=PUBLIC_THEME["card"])
-        ranking_grid.pack(fill="both", expand=True)
-        columns = 2 if len(ranking_rows) > 12 else 1
-        split = (len(ranking_rows) + columns - 1) // columns
-        for col in range(columns):
-            ranking_grid.grid_columnconfigure(col, weight=1, uniform="ranking")
-        for idx, row in enumerate(ranking_rows):
-            col = idx // split
-            local_row = idx % split
-            self._render_player_ranking_row(ranking_grid, row, local_row, col, columns)
+        else:
+            ranking_grid = tk.Frame(ranking_card, bg=PUBLIC_THEME["card"])
+            ranking_grid.pack(fill="x", expand=False)
+            columns = 2 if len(ranking_rows) > 12 else 1
+            split = (len(ranking_rows) + columns - 1) // columns
+            for col in range(columns):
+                ranking_grid.grid_columnconfigure(col, weight=1, uniform="ranking")
+            for idx, row in enumerate(ranking_rows):
+                col = idx // split
+                local_row = idx % split
+                self._render_player_ranking_row(ranking_grid, row, local_row, col, columns)
+        self._render_player_b_group_section(ranking_card)
 
     def _render_player_knockout_view(self) -> None:
         content = self.player_body
         if content is None:
             return
-        content.grid_columnconfigure(0, weight=1)
-        content.grid_columnconfigure(1, weight=0)
+        content.grid_columnconfigure(0, weight=3, uniform="ko")
+        content.grid_columnconfigure(1, weight=2, uniform="ko")
         content.grid_rowconfigure(0, weight=1)
         content.grid_rowconfigure(1, weight=0)
         content.grid_rowconfigure(2, weight=0)
 
         bracket_shell, bracket_card = self._public_card(content, "KO-Turnierbaum", "KO-Anzeige ab Swiss-Ende")
         bracket_shell.grid(row=0, column=0, sticky="nsew", pady=(0, 14))
+        self._render_player_b_next_card(content, 0, 1)
 
         canvas = tk.Canvas(bracket_card, bg=PUBLIC_THEME["card"], highlightthickness=0)
         canvas.pack(fill="both", expand=True)
@@ -919,6 +1273,10 @@ class TournamentGUI:
         podium_shell.grid(row=1, column=0, sticky="ew")
         podium_text = self._format_podium_text()
         tk.Label(podium_card, text=podium_text, bg=PUBLIC_THEME["card"], fg=PUBLIC_THEME["text"], font=("Segoe UI", 16, "bold"), justify="left", anchor="w").pack(anchor="w")
+
+        b_shell, b_card = self._public_card(content, "B-Gruppe Tabelle")
+        b_shell.grid(row=1, column=1, sticky="ew", padx=(14, 0))
+        self._render_player_b_group_section(b_card)
 
     def _format_podium_text(self) -> str:
         if len(self.engine.state.podium) >= 3:
@@ -1052,11 +1410,111 @@ class TournamentGUI:
             self.player_window.deiconify()
             self.player_window.lift()
 
+    def _monitor_geometries(self) -> List[tuple[int, int, int, int, bool]]:
+        monitors: List[tuple[int, int, int, int, bool]] = []
+        try:
+            user32 = ctypes.windll.user32
+
+            class RECT(ctypes.Structure):
+                _fields_ = [
+                    ("left", ctypes.c_long),
+                    ("top", ctypes.c_long),
+                    ("right", ctypes.c_long),
+                    ("bottom", ctypes.c_long),
+                ]
+
+            class MONITORINFO(ctypes.Structure):
+                _fields_ = [
+                    ("cbSize", wintypes.DWORD),
+                    ("rcMonitor", RECT),
+                    ("rcWork", RECT),
+                    ("dwFlags", wintypes.DWORD),
+                ]
+
+            monitor_enum_proc = ctypes.WINFUNCTYPE(
+                ctypes.c_int,
+                wintypes.HMONITOR,
+                wintypes.HDC,
+                ctypes.POINTER(RECT),
+                wintypes.LPARAM,
+            )
+
+            def collect_monitor(hmonitor: int, _hdc: int, _rect: object, _data: int) -> int:
+                info = MONITORINFO()
+                info.cbSize = ctypes.sizeof(MONITORINFO)
+                if user32.GetMonitorInfoW(hmonitor, ctypes.byref(info)):
+                    rect = info.rcMonitor
+                    monitors.append(
+                        (
+                            rect.left,
+                            rect.top,
+                            rect.right - rect.left,
+                            rect.bottom - rect.top,
+                            bool(info.dwFlags & 1),
+                        )
+                    )
+                return 1
+
+            user32.EnumDisplayMonitors(0, 0, monitor_enum_proc(collect_monitor), 0)
+        except Exception:
+            monitors = []
+
+        if not monitors:
+            monitors.append((0, 0, self.root.winfo_screenwidth(), self.root.winfo_screenheight(), True))
+        return monitors
+
+    def _secondary_monitor_geometry(self) -> Optional[tuple[int, int, int, int]]:
+        monitors = self._monitor_geometries()
+        secondary = next((monitor for monitor in monitors if not monitor[4]), None)
+        if secondary is None and len(monitors) > 1:
+            secondary = monitors[1]
+        if secondary is None:
+            return None
+        return secondary[:4]
+
+    def _set_window_bounds(self, window: tk.Toplevel, x: int, y: int, width: int, height: int) -> None:
+        try:
+            hwnd = wintypes.HWND(window.winfo_id())
+            ctypes.windll.user32.SetWindowPos(hwnd, 0, x, y, width, height, 0x0040)
+        except Exception:
+            window.geometry(f"{width}x{height}{x:+d}{y:+d}")
+
+    def _move_player_to_secondary_monitor(self) -> None:
+        if self.player_window is None:
+            return
+        geometry = self._secondary_monitor_geometry()
+        if geometry is None:
+            return
+        x, y, width, height = geometry
+        self.player_window.deiconify()
+        self.player_window.update_idletasks()
+        self._set_window_bounds(self.player_window, x, y, width, height)
+        self.player_window.update_idletasks()
+
+    def exit_player_fullscreen(self) -> None:
+        if self.player_window is None or not self.player_fullscreen:
+            return
+        self.player_fullscreen = False
+        self.player_window.attributes("-topmost", False)
+        self.player_window.overrideredirect(False)
+        self.player_window.geometry(self.player_windowed_geometry)
+        self.player_window.lift()
+
     def toggle_player_fullscreen(self) -> None:
         if self.player_window is None:
             return
-        self.player_fullscreen = not self.player_fullscreen
-        self.player_window.attributes("-fullscreen", self.player_fullscreen)
+        if self.player_fullscreen:
+            self.exit_player_fullscreen()
+            return
+
+        self.player_fullscreen = True
+        self.player_windowed_geometry = self.player_window.geometry()
+        self._move_player_to_secondary_monitor()
+        self.player_window.overrideredirect(True)
+        self._move_player_to_secondary_monitor()
+        self.player_window.attributes("-topmost", True)
+        self.player_window.lift()
+        self.player_window.focus_force()
 
     def persist_state(self, label: str = "autosave", snapshot: bool = False) -> None:
         self.backup_manager.save_state(self.engine.state, label=label, snapshot=snapshot)
@@ -1105,6 +1563,121 @@ class TournamentGUI:
         self.persist_state(label=f"phase_{self.engine.state.phase.lower()}", snapshot=True)
         self.status_var.set("Snapshot erstellt.")
 
+    def _b_group_team_names_from_gui(self) -> List[str]:
+        if self.b_group_team_text is None:
+            return []
+        raw = self.b_group_team_text.get("1.0", "end")
+        return [line.strip() for line in raw.splitlines() if line.strip()]
+
+    def save_b_group_teams_from_gui(self) -> None:
+        try:
+            self.engine.b_group_set_teams(self._b_group_team_names_from_gui())
+            self.persist_state(label="b_group_teams", snapshot=True)
+            self.status_var.set("B-Gruppen-Teams gespeichert.")
+            self._refresh_b_group_admin()
+        except Exception as exc:
+            messagebox.showerror("B-Gruppe", str(exc), parent=self.b_group_tab)
+
+    def start_b_group_from_gui(self) -> None:
+        try:
+            self.engine.b_group_start(self._b_group_team_names_from_gui(), B_GROUP_TABLE_LABEL)
+            self.persist_state(label="b_group_start", snapshot=True)
+            self.status_var.set("B-Gruppe gestartet.")
+            self.refresh_all(force=True)
+        except Exception as exc:
+            messagebox.showerror("B-Gruppe starten", str(exc), parent=self.b_group_tab)
+
+    def submit_b_group_result_from_gui(self) -> None:
+        match_id = self._b_group_selected_match_id()
+        if not match_id:
+            messagebox.showerror("B-Gruppe", "Bitte ein B-Gruppen-Match auswählen.", parent=self.b_group_tab)
+            return
+        match = self.engine.state.b_group.matches.get(match_id)
+        if not match:
+            messagebox.showerror("B-Gruppe", "Dieses Match wurde nicht gefunden.", parent=self.b_group_tab)
+            return
+        winner_name = self.b_group_winner_var.get()
+        winner_id = match.team_a if self.engine.b_group_team_name(match.team_a) == winner_name else match.team_b
+        try:
+            loser_cups = int(self.b_group_loser_cups_var.get())
+            self.engine.b_group_submit_result(match_id, winner_id, loser_cups, B_GROUP_TABLE_LABEL)
+            self.persist_state(label="b_group_result", snapshot=False)
+            self.status_var.set("B-Gruppen-Ergebnis gespeichert.")
+            self.refresh_all(force=True)
+        except Exception as exc:
+            messagebox.showerror("B-Gruppe", str(exc), parent=self.b_group_tab)
+
+    def edit_b_group_result_from_gui(self) -> None:
+        finished_rows = [row for row in self.engine.b_group_match_rows() if row["status"] == "finished"]
+        if not finished_rows:
+            messagebox.showinfo("B-Gruppe", "Es gibt noch kein gespeichertes B-Gruppen-Ergebnis.", parent=self.b_group_tab)
+            return
+
+        dialog = tk.Toplevel(self.root)
+        dialog.title("B-Gruppen-Ergebnis bearbeiten")
+        dialog.transient(self.root)
+        dialog.grab_set()
+        dialog.configure(bg=PUBLIC_THEME["bg"])
+        dialog.geometry("620x245")
+
+        choices = {
+            f"{row['match_id']} | {row['label']} | {row['team_a']} vs {row['team_b']}": row["match_id"]
+            for row in finished_rows
+        }
+        match_var = tk.StringVar(value=next(iter(choices)))
+        winner_var = tk.StringVar()
+        cups_var = tk.StringVar(value="0")
+
+        body = ttk.Frame(dialog, padding=16)
+        body.pack(fill="both", expand=True)
+        body.columnconfigure(1, weight=1)
+
+        ttk.Label(body, text="Match", style="Card.TLabel").grid(row=0, column=0, sticky="w", padx=(0, 10), pady=(0, 8))
+        match_combo = ttk.Combobox(body, textvariable=match_var, values=list(choices.keys()), state="readonly")
+        match_combo.grid(row=0, column=1, sticky="ew", pady=(0, 8))
+
+        ttk.Label(body, text="Sieger", style="Card.TLabel").grid(row=1, column=0, sticky="w", padx=(0, 10), pady=(0, 8))
+        winner_combo = ttk.Combobox(body, textvariable=winner_var, state="readonly")
+        winner_combo.grid(row=1, column=1, sticky="ew", pady=(0, 8))
+
+        ttk.Label(body, text="Verlierer-Becher", style="Card.TLabel").grid(row=2, column=0, sticky="w", padx=(0, 10), pady=(0, 12))
+        ttk.Spinbox(body, textvariable=cups_var, from_=0, to=9, width=8).grid(row=2, column=1, sticky="w", pady=(0, 12))
+
+        def sync_fields(_event: object = None) -> None:
+            match = self.engine.state.b_group.matches.get(choices[match_var.get()])
+            if not match:
+                return
+            winners = [self.engine.b_group_team_name(match.team_a), self.engine.b_group_team_name(match.team_b)]
+            winner_combo["values"] = winners
+            winner_var.set(self.engine.b_group_team_name(match.winner) if match.winner else winners[0])
+            cups_var.set(str(match.loser_cups_hit if match.loser_cups_hit is not None else 0))
+
+        def save_edit() -> None:
+            match = self.engine.state.b_group.matches.get(choices[match_var.get()])
+            if not match:
+                return
+            winner_id = match.team_a if self.engine.b_group_team_name(match.team_a) == winner_var.get() else match.team_b
+            try:
+                self.engine.b_group_edit_result(match.match_id, winner_id, int(cups_var.get()))
+                self.persist_state(label="b_group_edit_result", snapshot=True)
+                self.status_var.set("B-Gruppen-Ergebnis bearbeitet.")
+                self.refresh_all(force=True)
+                dialog.destroy()
+            except Exception as exc:
+                messagebox.showerror("B-Gruppe", str(exc), parent=dialog)
+
+        match_combo.bind("<<ComboboxSelected>>", sync_fields)
+        sync_fields()
+        ttk.Button(body, text="Änderung speichern", command=save_edit, style="Action.TButton").grid(row=3, column=0, columnspan=2, sticky="ew")
+
+    def reset_b_group_from_gui(self) -> None:
+        if not messagebox.askyesno("B-Gruppe zurücksetzen", "B-Gruppe wirklich komplett zurücksetzen?", parent=self.b_group_tab):
+            return
+        self.engine.b_group_reset()
+        self.persist_state(label="b_group_reset", snapshot=True)
+        self.status_var.set("B-Gruppe zurückgesetzt.")
+        self.refresh_all(force=True)
+
     def rebuild_preview(self) -> None:
         # The preview is derived from the current state and is only redrawn on demand.
         self.refresh_all(force=True)
@@ -1135,7 +1708,7 @@ class TournamentGUI:
                 continue
             label = (
                 f"{row['slot']} | {row['team_a']} vs {row['team_b']} | "
-                f"{row['status']} | Sieger: {row['winner']} | OT: {row['ot']} | Cups: {row['cups']}"
+                f"{row['status']} | Sieger: {row['winner']} | Verlängerung: {row['ot']} | Cups: {row['cups']}"
             )
             choices[label] = row["match_id"]
         return choices
@@ -1170,7 +1743,7 @@ class TournamentGUI:
         winner_combo = ttk.Combobox(body, textvariable=winner_var, state="readonly")
         winner_combo.grid(row=1, column=1, sticky="ew", pady=(0, 8))
 
-        ttk.Checkbutton(body, text="OT", variable=ot_var, command=lambda: cups_var.set("10" if ot_var.get() else "0")).grid(row=2, column=0, sticky="w", pady=(0, 8))
+        ttk.Checkbutton(body, text="Verlängerung", variable=ot_var, command=lambda: cups_var.set("10" if ot_var.get() else "0")).grid(row=2, column=0, sticky="w", pady=(0, 8))
         ttk.Spinbox(body, textvariable=cups_var, from_=0, to=12, width=10).grid(row=2, column=1, sticky="w", pady=(0, 8))
 
         def sync_match_fields(_event: object = None) -> None:
