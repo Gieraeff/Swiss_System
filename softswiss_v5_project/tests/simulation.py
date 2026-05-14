@@ -44,6 +44,9 @@ def simulate_turnier(seed: int = 42) -> Dict[str, object]:
     while engine.state.phase != "FINISHED":
         active = engine.active_matches()
         if not active:
+            if engine.state.phase == "SWISS" and engine.swiss_complete():
+                engine.start_knockout()
+                continue
             # In Swiss this means the next wave should be generated automatically.
             engine.fill_free_tables(relaxed=False)
             active = engine.active_matches()

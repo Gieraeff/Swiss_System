@@ -4,6 +4,7 @@ import hashlib
 import json
 import tkinter as tk
 from tkinter import messagebox, ttk
+from turtle import right
 from typing import List, Optional
 
 from core.backup import BackupManager
@@ -32,13 +33,19 @@ class TournamentGUI:
         self.progress_var = tk.StringVar(value="Noch kein Turnier gestartet")
         self.status_var = tk.StringVar(value="Bereit.")
         self.save_var = tk.StringVar(value="Autosave: -")
-        self.top_hint_var = tk.StringVar(value="Top 8 werden dezent markiert.")
+        self.top_hint_var = tk.StringVar(value="Top 8 kommen weiter")
 
         self.selected_table_var = tk.StringVar()
         self.selected_winner_var = tk.StringVar()
         self.loser_cups_var = tk.StringVar(value="0")
         self.ot_var = tk.BooleanVar(value=False)
         self.ko_button: Optional[ttk.Button] = None
+        self.undo_button: Optional[ttk.Button] = None
+        self.edit_button: Optional[ttk.Button] = None
+        self.reset_match_button: Optional[ttk.Button] = None
+        self.fill_button: Optional[ttk.Button] = None
+        self.save_now_button: Optional[ttk.Button] = None
+        self.recompute_button: Optional[ttk.Button] = None
 
         self.setup_widgets()
         self.refresh_all(force=True)
@@ -232,13 +239,16 @@ class TournamentGUI:
 
         self.setup_tab = ttk.Frame(notebook, padding=12)
         self.control_tab = ttk.Frame(notebook, padding=12)
+        self.ranking_tab = ttk.Frame(notebook, padding=12)
         self.backup_tab = ttk.Frame(notebook, padding=12)
         notebook.add(self.setup_tab, text="Setup")
         notebook.add(self.control_tab, text="Turnierleitung")
+        notebook.add(self.ranking_tab, text="Live-Ranking")
         notebook.add(self.backup_tab, text="Backup")
 
         self._build_setup_tab()
         self._build_control_tab()
+        self._build_Live_Ranking_tab()
         self._build_backup_tab()
 
     def _build_setup_tab(self) -> None:
@@ -275,16 +285,53 @@ class TournamentGUI:
         ttk.Button(buttons, text="Autosave laden", command=self.load_autosave).pack(side="left", padx=(0, 8))
         ttk.Button(buttons, text="Autosave löschen", command=self.delete_autosave).pack(side="left")
 
+    def _build_Live_Ranking_tab(self) -> None:
+        ranking_shell, ranking_frame = self._admin_card(
+            self.ranking_tab,
+            "Live-Ranking",
+            "Punkte, Cups, Buchholz und Spiele",
+            padding=(18, 16),
+        )
+        ranking_shell.pack(fill="both", expand=True)
+        self.ranking_tree = ttk.Treeview(
+            ranking_frame,
+            columns=("rank", "seed", "team", "pts", "cups", "bh", "rounds"),
+            show="headings",
+            height=18,
+        )
+        for col, title, width in [
+            ("rank", "#", 38),
+            ("seed", "Seed", 55),
+            ("team", "Team", 200),
+            ("pts", "Pkt", 55),
+            ("cups", "Cups", 70),
+            ("bh", "Buchholz", 86),
+            ("rounds", "Runden", 68),
+        ]:
+            self.ranking_tree.heading(col, text=title)
+            self.ranking_tree.column(col, width=width, anchor="center")
+        self._style_tree_tags(self.ranking_tree)
+        self.ranking_tree.pack(fill="both", expand=True)
+
     def _build_control_tab(self) -> None:
         pane = ttk.Panedwindow(self.control_tab, orient="horizontal")
         pane.pack(fill="both", expand=True)
 
-        left_shell, left = self._scrollable_admin_column(pane, padding=(0, 0, 12, 0))
+        left = ttk.Frame(pane, padding=(0, 0, 12, 0))
         right_shell, right = self._scrollable_admin_column(pane, padding=(12, 0, 0, 0))
-        pane.add(left_shell, weight=3)
+        pane.add(left, weight=3)
         pane.add(right_shell, weight=4)
 
-        current_shell, current_frame = self._admin_card(left, "Laufende Matches", "Aktive und gerade freigegebene Slots")
+        preview_shell, preview_frame = self._admin_card(right, "Next Match", "Vorbereitete Paarungen für freie Tische")
+        preview_shell.pack(fill="x", pady=(0, 12))
+        self.preview_tree = ttk.Treeview(
+            preview_frame,
+            columns=("idx", "team_a", "team_b", "status"),
+            show="headings",
+            height=3,
+        )
+
+        current_shell, current_frame = self._admin_card(right, "Laufende Matches", "Aktive und gerade freigegebene Slots")
         current_shell.pack(fill="both", expand=False, pady=(0, 12))
         self.current_wave_tree = ttk.Treeview(
             current_frame,
@@ -305,7 +352,7 @@ class TournamentGUI:
         self._style_tree_tags(self.current_wave_tree)
         self.current_wave_tree.pack(fill="x", expand=False)
 
-        next_shell, next_frame = self._admin_card(left, "Vorbereitete Matches", "Bereit, sobald ein Tisch frei wird")
+        next_shell, next_frame = self._admin_card(right, "Vorbereitete Matches", "Bereit, sobald ein Tisch frei wird")
         next_shell.pack(fill="both", expand=False, pady=(0, 12))
         self.prepared_wave_tree = ttk.Treeview(
             next_frame,
@@ -332,7 +379,7 @@ class TournamentGUI:
             entry_frame.columnconfigure(idx, weight=1)
 
         ttk.Label(entry_frame, text="Tisch", style="Card.TLabel").grid(row=0, column=0, sticky="w", padx=(0, 8), pady=(0, 8))
-        self.table_combo = ttk.Combobox(entry_frame, textvariable=self.selected_table_var, state="readonly", width=12)
+        self.table_combo = ttk.Combobox(entry_frame, textvariable=self.selected_table_var, state="readonly", width=35)
         self.table_combo.grid(row=0, column=1, sticky="ew", pady=(0, 8))
         self.table_combo.bind("<<ComboboxSelected>>", self.on_table_selected)
 
@@ -340,7 +387,7 @@ class TournamentGUI:
         self.winner_combo = ttk.Combobox(entry_frame, textvariable=self.selected_winner_var, state="readonly", width=28)
         self.winner_combo.grid(row=0, column=3, sticky="ew", pady=(0, 8))
 
-        ttk.Checkbutton(entry_frame, text="OT", variable=self.ot_var, command=self.on_ot_toggle).grid(row=1, column=0, sticky="w")
+        ttk.Checkbutton(entry_frame, text="Verlängerung", variable=self.ot_var, command=self.on_ot_toggle).grid(row=1, column=0, sticky="w")
         ttk.Label(entry_frame, text="Verlierer-Becher", style="Card.TLabel").grid(row=1, column=2, sticky="w", padx=(12, 8))
         self.loser_spin = ttk.Spinbox(entry_frame, textvariable=self.loser_cups_var, from_=0, to=12, width=10)
         self.loser_spin.grid(row=1, column=3, sticky="w")
@@ -356,12 +403,25 @@ class TournamentGUI:
             row=3, column=0, columnspan=4, sticky="ew", pady=(10, 0)
         )
 
-        actions_shell, actions = self._admin_card(left, "Aktionen", "Turnierfluss, Vorschau und Sicherung")
+        actions_shell, actions = self._admin_card(left, "Steuerung", "Korrekturen, Betrieb und Turnierphasen")
         actions_shell.pack(fill="x", pady=(0, 12))
-        ttk.Button(actions, text="Freie Tische auffüllen", command=self.fill_tables_normal).pack(fill="x", pady=(0, 6))
-        ttk.Button(actions, text="Erweiterte Suche manuell", command=self.fill_tables_relaxed).pack(fill="x", pady=(0, 6))
-        ttk.Button(actions, text="Next-Up neu anzeigen", command=self.rebuild_preview).pack(fill="x", pady=(0, 6))
-        ttk.Button(actions, text="Autosave jetzt", command=self.save_autosave).pack(fill="x", pady=(0, 10))
+        ttk.Label(actions, text="Korrektur", style="CardTitle.TLabel").pack(anchor="w")
+        self.undo_button = ttk.Button(actions, text="Letzte Eingabe zurück", command=self.undo_last_result_from_gui)
+        self.undo_button.pack(fill="x", pady=(6, 6))
+        self.edit_button = ttk.Button(actions, text="Match bearbeiten", command=self.open_edit_match_dialog)
+        self.edit_button.pack(fill="x", pady=(0, 6))
+        self.reset_match_button = ttk.Button(actions, text="Match zurücksetzen", command=self.open_reset_match_dialog)
+        self.reset_match_button.pack(fill="x", pady=(0, 12))
+
+        ttk.Label(actions, text="Betrieb", style="CardTitle.TLabel").pack(anchor="w")
+        self.fill_button = ttk.Button(actions, text="Freie Plätze auffüllen", command=self.fill_tables_normal)
+        self.fill_button.pack(fill="x", pady=(6, 6))
+        self.save_now_button = ttk.Button(actions, text="Jetzt speichern", command=self.save_now_from_gui)
+        self.save_now_button.pack(fill="x", pady=(0, 6))
+        self.recompute_button = ttk.Button(actions, text="Nächste Welle neu berechnen", command=self.recompute_pairing_from_gui)
+        self.recompute_button.pack(fill="x", pady=(0, 12))
+
+        ttk.Label(actions, text="Turnier", style="CardTitle.TLabel").pack(anchor="w")
         self.ko_button = ttk.Button(actions, text="KO starten", command=self.start_knockout_from_gui, style="Primary.TButton")
         self.ko_button.pack(fill="x")
 
@@ -369,36 +429,7 @@ class TournamentGUI:
         backup_shell.pack(fill="x")
         ttk.Label(backup_status, textvariable=self.save_var, style="CardMuted.TLabel").pack(anchor="w")
 
-        ranking_shell, ranking_frame = self._admin_card(right, "Live-Ranking", "Punkte, Cups, Buchholz und Spiele")
-        ranking_shell.pack(fill="both", expand=True, pady=(0, 12))
-        self.ranking_tree = ttk.Treeview(
-            ranking_frame,
-            columns=("rank", "seed", "team", "pts", "cups", "bh", "rounds"),
-            show="headings",
-            height=18,
-        )
-        for col, title, width in [
-            ("rank", "#", 38),
-            ("seed", "Seed", 55),
-            ("team", "Team", 200),
-            ("pts", "Pkt", 55),
-            ("cups", "Cups", 70),
-            ("bh", "Buchholz", 86),
-            ("rounds", "Runden", 68),
-        ]:
-            self.ranking_tree.heading(col, text=title)
-            self.ranking_tree.column(col, width=width, anchor="center")
-        self._style_tree_tags(self.ranking_tree)
-        self.ranking_tree.pack(fill="both", expand=True)
 
-        preview_shell, preview_frame = self._admin_card(right, "Next Match", "Vorbereitete Paarungen für freie Tische")
-        preview_shell.pack(fill="x", pady=(0, 12))
-        self.preview_tree = ttk.Treeview(
-            preview_frame,
-            columns=("idx", "team_a", "team_b", "status"),
-            show="headings",
-            height=3,
-        )
         for col, title, width in [
             ("idx", "#", 35),
             ("team_a", "Team A", 180),
@@ -605,14 +636,26 @@ class TournamentGUI:
             self.preview_tree.insert("", "end", values=(idx, row["team_a"], row["team_b"], row["status"]), tags=("ready",))
 
     def _refresh_action_states(self) -> None:
-        if self.ko_button is None:
-            return
+        has_swiss_matches = any(match.phase == "SWISS" for match in self.engine.state.matches.values())
+        has_finished_swiss = any(match.phase == "SWISS" and match.status == "finished" for match in self.engine.state.matches.values())
+        in_swiss = self.engine.state.phase == "SWISS"
+        for button, enabled in [
+            (self.undo_button, has_finished_swiss),
+            (self.edit_button, has_finished_swiss),
+            (self.reset_match_button, has_swiss_matches),
+            (self.fill_button, in_swiss),
+            (self.save_now_button, self.engine.state.phase != "SETUP"),
+            (self.recompute_button, in_swiss),
+        ]:
+            if button is not None:
+                self._set_button_enabled(button, enabled)
         can_start_ko = (
             self.engine.state.phase == "SWISS"
             and self.engine.swiss_complete()
             and not self.engine.state.active_tables
         )
-        self._set_button_enabled(self.ko_button, can_start_ko)
+        if self.ko_button is not None:
+            self._set_button_enabled(self.ko_button, can_start_ko)
 
     def _refresh_prepared_wave_tree(self) -> None:
         for item in self.prepared_wave_tree.get_children():
@@ -791,7 +834,7 @@ class TournamentGUI:
             ).pack(fill="x", anchor="w")
             tk.Label(
                 hero_card,
-                text=first.get("status", "Macht euch bereit"),
+                text=first.get("status", "Wir bitten sie, sich Spielbereit zu halten. Die Firma Dankt für Ihr Verständnis."),
                 bg=PUBLIC_THEME["highlight_soft"],
                 fg=PUBLIC_THEME["accent_dark"],
                 font=("Segoe UI", 16, "bold"),
@@ -1054,6 +1097,10 @@ class TournamentGUI:
         self.persist_state(label="autosave", snapshot=False)
         self.status_var.set("Autosave gespeichert.")
 
+    def save_now_from_gui(self) -> None:
+        self.persist_state(label="manual_save", snapshot=True)
+        self.status_var.set("Manuell gespeichert.")
+
     def save_snapshot(self) -> None:
         self.persist_state(label=f"phase_{self.engine.state.phase.lower()}", snapshot=True)
         self.status_var.set("Snapshot erstellt.")
@@ -1062,6 +1109,125 @@ class TournamentGUI:
         # The preview is derived from the current state and is only redrawn on demand.
         self.refresh_all(force=True)
         self.status_var.set("Vorschau aktualisiert.")
+
+    def recompute_pairing_from_gui(self) -> None:
+        try:
+            changed = self.engine.recompute_pairing()
+            self.persist_state(label="recompute_pairing", snapshot=True)
+            self.status_var.set("Nächste Welle neu berechnet." if changed else "Nächste Welle geprüft, keine Änderung nötig.")
+            self.refresh_all(force=True)
+        except Exception as exc:
+            messagebox.showerror("Fehler", str(exc))
+
+    def undo_last_result_from_gui(self) -> None:
+        try:
+            match_id = self.engine.undo_last_result()
+            self.persist_state(label="undo_result", snapshot=True)
+            self.status_var.set(f"Letzte Eingabe zurückgenommen ({match_id}).")
+            self.refresh_all(force=True)
+        except Exception as exc:
+            messagebox.showerror("Fehler", str(exc))
+
+    def _match_choice_rows(self, finished_only: bool = False) -> dict[str, str]:
+        choices: dict[str, str] = {}
+        for row in self.engine.editable_match_rows():
+            if finished_only and row["status"] != "finished":
+                continue
+            label = (
+                f"{row['slot']} | {row['team_a']} vs {row['team_b']} | "
+                f"{row['status']} | Sieger: {row['winner']} | OT: {row['ot']} | Cups: {row['cups']}"
+            )
+            choices[label] = row["match_id"]
+        return choices
+
+    def open_edit_match_dialog(self) -> None:
+        choices = self._match_choice_rows(finished_only=True)
+        if not choices:
+            messagebox.showinfo("Match bearbeiten", "Es gibt noch kein gespeichertes Swiss-Ergebnis.")
+            return
+
+        dialog = tk.Toplevel(self.root)
+        dialog.title("Match bearbeiten")
+        dialog.transient(self.root)
+        dialog.grab_set()
+        dialog.configure(bg=PUBLIC_THEME["bg"])
+        dialog.geometry("560x260")
+
+        match_var = tk.StringVar(value=next(iter(choices)))
+        winner_var = tk.StringVar()
+        cups_var = tk.StringVar(value="0")
+        ot_var = tk.BooleanVar(value=False)
+
+        body = ttk.Frame(dialog, padding=16)
+        body.pack(fill="both", expand=True)
+        body.columnconfigure(1, weight=1)
+
+        ttk.Label(body, text="Match").grid(row=0, column=0, sticky="w", padx=(0, 10), pady=(0, 8))
+        match_combo = ttk.Combobox(body, textvariable=match_var, values=list(choices.keys()), state="readonly")
+        match_combo.grid(row=0, column=1, sticky="ew", pady=(0, 8))
+
+        ttk.Label(body, text="Sieger").grid(row=1, column=0, sticky="w", padx=(0, 10), pady=(0, 8))
+        winner_combo = ttk.Combobox(body, textvariable=winner_var, state="readonly")
+        winner_combo.grid(row=1, column=1, sticky="ew", pady=(0, 8))
+
+        ttk.Checkbutton(body, text="OT", variable=ot_var, command=lambda: cups_var.set("10" if ot_var.get() else "0")).grid(row=2, column=0, sticky="w", pady=(0, 8))
+        ttk.Spinbox(body, textvariable=cups_var, from_=0, to=12, width=10).grid(row=2, column=1, sticky="w", pady=(0, 8))
+
+        def sync_match_fields(_event: object = None) -> None:
+            match = self.engine.state.matches[choices[match_var.get()]]
+            winner_combo["values"] = [self.engine.team_name(match.team_a), self.engine.team_name(match.team_b)]
+            winner_var.set(self.engine.team_name(match.winner) if match.winner else self.engine.team_name(match.team_a))
+            ot_var.set(match.is_overtime)
+            cups_var.set(str(match.loser_cups_hit if match.loser_cups_hit is not None else (10 if match.is_overtime else 0)))
+
+        def save_edit() -> None:
+            match = self.engine.state.matches[choices[match_var.get()]]
+            winner_id = match.team_a if self.engine.team_name(match.team_a) == winner_var.get() else match.team_b
+            try:
+                self.engine.edit_match_result(match.match_id, winner_id, ot_var.get(), int(cups_var.get()))
+                self.persist_state(label="edit_match", snapshot=True)
+                self.status_var.set("Match bearbeitet.")
+                self.refresh_all(force=True)
+                dialog.destroy()
+            except Exception as exc:
+                messagebox.showerror("Fehler", str(exc), parent=dialog)
+
+        match_combo.bind("<<ComboboxSelected>>", sync_match_fields)
+        sync_match_fields()
+        ttk.Button(body, text="Speichern", command=save_edit, style="Action.TButton").grid(row=3, column=0, columnspan=2, sticky="ew", pady=(12, 0))
+
+    def open_reset_match_dialog(self) -> None:
+        choices = self._match_choice_rows(finished_only=False)
+        if not choices:
+            messagebox.showinfo("Match zurücksetzen", "Es gibt noch kein Swiss-Match.")
+            return
+        label = tk.StringVar(value=next(iter(choices)))
+        dialog = tk.Toplevel(self.root)
+        dialog.title("Match zurücksetzen")
+        dialog.transient(self.root)
+        dialog.grab_set()
+        dialog.configure(bg=PUBLIC_THEME["bg"])
+        dialog.geometry("560x170")
+
+        body = ttk.Frame(dialog, padding=16)
+        body.pack(fill="both", expand=True)
+        body.columnconfigure(0, weight=1)
+        ttk.Label(body, text="Match auswählen").grid(row=0, column=0, sticky="w", pady=(0, 8))
+        ttk.Combobox(body, textvariable=label, values=list(choices.keys()), state="readonly").grid(row=1, column=0, sticky="ew", pady=(0, 12))
+
+        def reset_selected() -> None:
+            if not messagebox.askyesno("Match zurücksetzen", "Dieses Match wirklich auf offen setzen?", parent=dialog):
+                return
+            try:
+                self.engine.reset_match(choices[label.get()])
+                self.persist_state(label="reset_match", snapshot=True)
+                self.status_var.set("Match zurückgesetzt.")
+                self.refresh_all(force=True)
+                dialog.destroy()
+            except Exception as exc:
+                messagebox.showerror("Fehler", str(exc), parent=dialog)
+
+        ttk.Button(body, text="Zurücksetzen", command=reset_selected, style="Action.TButton").grid(row=2, column=0, sticky="ew")
 
     def start_knockout_from_gui(self) -> None:
         if self.engine.state.phase != "SWISS":
