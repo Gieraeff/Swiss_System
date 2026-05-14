@@ -134,6 +134,266 @@ class SwissTournamentEngine:
     def swiss_complete(self) -> bool:
         return bool(self.state.teams) and all(team.swiss_games_played >= SWISS_GAMES_PER_TEAM for team in self.state.teams.values())
 
+    def editable_match_rows(self) -> List[dict]:
+        rows: List[dict] = []
+        for match in sorted(self.state.matches.values(), key=lambda item: (item.started_ts or 0.0, item.match_id), reverse=True):
+            if match.phase != "SWISS":
+                continue
+            rows.append(
+                {
+                    "match_id": match.match_id,
+                    "slot": match.slot_label or match.match_id,
+                    "team_a": self.team_name(match.team_a),
+                    "team_b": self.team_name(match.team_b),
+                    "status": match.status,
+                    "winner": self.team_name(match.winner) if match.winner else "-",
+                    "ot": "ja" if match.is_overtime else "nein",
+                    "cups": "-" if match.loser_cups_hit is None else match.loser_cups_hit,
+                }
+            )
+        return rows
+
+    def _swiss_result_values(self, is_overtime: bool, loser_cups_hit: int) -> tuple[int, int, int, int]:
+        if is_overtime:
+            if loser_cups_hit < 10 or loser_cups_hit > 12:
+                raise ValueError("In OT muss der Verlierer zwischen 10 und 12 Becher getroffen haben.")
+            winner_points, loser_points = 2, 1
+            winner_cup_change = 13 - loser_cups_hit
+            loser_cup_change = 0
+        else:
+            if loser_cups_hit < 0 or loser_cups_hit > 9:
+                raise ValueError("Ohne OT muss der Verlierer zwischen 0 und 9 Becher getroffen haben.")
+            winner_points, loser_points = 3, 0
+            winner_cup_change = 10 - loser_cups_hit
+            loser_cup_change = -winner_cup_change
+        return winner_points, loser_points, winner_cup_change, loser_cup_change
+
+    def _remove_completed_match_id(self, match_id: str) -> None:
+        self.state.completed_match_ids = [value for value in self.state.completed_match_ids if value != match_id]
+
+    def _reset_match_result_fields(self, match: Match, status: str = "pending") -> None:
+        match.status = status
+        match.winner = None
+        match.loser = None
+        match.is_overtime = False
+        match.loser_cups_hit = None
+        match.ended_ts = None
+
+    def _trim_wave_to_existing_matches(self, wave: Optional[WavePlan]) -> Optional[WavePlan]:
+        if not wave:
+            return None
+        wave.match_ids = [match_id for match_id in wave.match_ids if match_id in self.state.matches]
+        return wave if wave.match_ids else None
+
+    def _discard_open_swiss_plans(self, preserve_match_ids: Optional[set[str]] = None) -> None:
+        preserve_match_ids = preserve_match_ids or set()
+        for match_id, match in list(self.state.matches.items()):
+            if match.phase == "SWISS" and match.status == "pending" and match_id not in preserve_match_ids:
+                del self.state.matches[match_id]
+        self.state.current_wave = self._trim_wave_to_existing_matches(self.state.current_wave)
+        self.state.prepared_wave = None
+
+    def _rebuild_team_derived_state(self) -> None:
+        for team in self.state.teams.values():
+            team.swiss_points = 0
+            team.cups_metric = 0
+            team.swiss_games_played = 0
+            team.opponents.clear()
+            team.last_finish_ts = 0.0
+            team.active_match_id = None
+            if self.state.phase == "SWISS":
+                team.ko_seed = None
+
+        rebuilt_completed: List[str] = []
+        seen_completed: set[str] = set()
+        for match_id in self.state.completed_match_ids:
+            if match_id in seen_completed:
+                continue
+            match = self.state.matches.get(match_id)
+            if not match or match.status != "finished":
+                continue
+            seen_completed.add(match_id)
+            rebuilt_completed.append(match_id)
+            if match.phase != "SWISS" or match.winner is None or match.loser is None or match.loser_cups_hit is None:
+                continue
+
+            winner_points, loser_points, winner_cups, loser_cups = self._swiss_result_values(match.is_overtime, match.loser_cups_hit)
+            winner = self.get_team(match.winner)
+            loser = self.get_team(match.loser)
+            winner.swiss_points += winner_points
+            loser.swiss_points += loser_points
+            winner.cups_metric += winner_cups
+            loser.cups_metric += loser_cups
+            winner.swiss_games_played += 1
+            loser.swiss_games_played += 1
+            winner.opponents.add(loser.id)
+            loser.opponents.add(winner.id)
+            finished_ts = match.ended_ts or 0.0
+            winner.last_finish_ts = max(winner.last_finish_ts, finished_ts)
+            loser.last_finish_ts = max(loser.last_finish_ts, finished_ts)
+        self.state.completed_match_ids = rebuilt_completed
+
+        self.state.active_tables = {}
+        for match in self.state.matches.values():
+            if match.status != "active" or match.table is None:
+                continue
+            self.state.active_tables[match.table] = match.match_id
+            if match.team_a in self.state.teams:
+                self.state.teams[match.team_a].active_match_id = match.match_id
+            if match.team_b in self.state.teams:
+                self.state.teams[match.team_b].active_match_id = match.match_id
+
+    def _rebuild_after_manual_change(self, rebuild_pairing: bool = True, preserve_match_ids: Optional[set[str]] = None) -> None:
+        self._rebuild_team_derived_state()
+        self._discard_open_swiss_plans(preserve_match_ids=preserve_match_ids)
+        if rebuild_pairing:
+            self.recompute_pairing(notify=False, preserve_match_ids=preserve_match_ids)
+
+    def _rebuild_after_result_correction(
+        self,
+        rebuild_prepared_wave: bool,
+        preserve_pending_match_ids: Optional[set[str]] = None,
+    ) -> None:
+        preserve_pending_match_ids = preserve_pending_match_ids or set()
+        self._rebuild_team_derived_state()
+        if not rebuild_prepared_wave or self.state.phase != "SWISS":
+            return
+
+        prepared_wave = self.state.prepared_wave
+        if not prepared_wave:
+            return
+
+        prepared_matches = self.prepared_wave_matches()
+        has_locked_prepared_match = any(match.status != "pending" for match in prepared_matches)
+        preserve_in_prepared = bool(preserve_pending_match_ids.intersection(prepared_wave.match_ids))
+        if has_locked_prepared_match or preserve_in_prepared:
+            if self._reassign_wave_remaining(prepared_wave):
+                return
+            if has_locked_prepared_match:
+                return
+
+        prepared_wave_index = prepared_wave.wave_index
+        self._discard_wave_matches(prepared_wave)
+        self.state.prepared_wave = None
+
+        if self.swiss_complete():
+            return
+        if self.current_wave_complete() or not self.pending_current_wave():
+            try:
+                self._build_wave_plan(prepared_wave_index, relaxed=False, target="prepared")
+            except ValueError:
+                self._build_wave_plan(prepared_wave_index, relaxed=True, target="prepared")
+
+    def undo_last_result(self) -> str:
+        for match_id in reversed(self.state.completed_match_ids):
+            match = self.state.matches.get(match_id)
+            if match and match.phase == "SWISS" and match.status == "finished":
+                self._remove_completed_match_id(match_id)
+                old_table = match.table
+                replacement_match_id = self.state.active_tables.get(old_table) if old_table is not None else None
+                replacement_match = self.state.matches.get(replacement_match_id or "")
+                if replacement_match and replacement_match.match_id != match.match_id:
+                    replacement_match.table = None
+                    replacement_match.started_ts = 0.0
+                    replacement_match.status = "pending"
+
+                self._reset_match_result_fields(match, status="active" if old_table is not None else "pending")
+                match.table = old_table
+                preserve_pending_match_ids = {match.match_id}
+                if replacement_match and replacement_match.match_id != match.match_id:
+                    preserve_pending_match_ids.add(replacement_match.match_id)
+                self._rebuild_after_result_correction(
+                    rebuild_prepared_wave=self.state.prepared_wave is not None,
+                    preserve_pending_match_ids=preserve_pending_match_ids,
+                )
+                self.log(f"Letzte Eingabe zurueckgenommen: {match.slot_label or match.match_id}.")
+                self._notify_change()
+                return match.match_id
+        raise ValueError("Es gibt kein Swiss-Ergebnis, das zurueckgenommen werden kann.")
+
+    def edit_match_result(self, match_id: str, winner_team_id: int, is_overtime: bool, loser_cups_hit: int) -> None:
+        match = self.state.matches.get(match_id)
+        if not match or match.phase != "SWISS":
+            raise ValueError("Dieses Match kann hier nicht bearbeitet werden.")
+        if match.status != "finished":
+            raise ValueError("Nur bereits gespeicherte Swiss-Ergebnisse koennen bearbeitet werden.")
+        if winner_team_id not in {match.team_a, match.team_b}:
+            raise ValueError("Das Sieger-Team gehoert nicht zu diesem Match.")
+        loser_team_id = match.team_b if winner_team_id == match.team_a else match.team_a
+        self._swiss_result_values(is_overtime, loser_cups_hit)
+        match.winner = winner_team_id
+        match.loser = loser_team_id
+        match.is_overtime = is_overtime
+        match.loser_cups_hit = loser_cups_hit
+        if match.ended_ts is None:
+            match.ended_ts = self.now()
+        self._rebuild_after_result_correction(rebuild_prepared_wave=self.state.prepared_wave is not None)
+        self.log(f"Match bearbeitet: {match.slot_label or match.match_id}.")
+        self._notify_change()
+
+    def reset_match(self, match_id: str) -> None:
+        match = self.state.matches.get(match_id)
+        if not match or match.phase != "SWISS":
+            raise ValueError("Dieses Match kann hier nicht zurueckgesetzt werden.")
+        self._remove_completed_match_id(match_id)
+        if match.table in self.state.active_tables:
+            del self.state.active_tables[match.table]
+        match.table = None
+        match.started_ts = 0.0
+        self._reset_match_result_fields(match, status="pending")
+        self._rebuild_after_manual_change(rebuild_pairing=True, preserve_match_ids={match.match_id})
+        self.log(f"Match zurueckgesetzt: {match.slot_label or match.match_id}.")
+        self._notify_change()
+
+    def _recompute_prepared_wave(self) -> bool:
+        prepared_wave = self.state.prepared_wave
+        if not prepared_wave:
+            return False
+
+        prepared_matches = self.prepared_wave_matches()
+        if any(match.status != "pending" for match in prepared_matches):
+            return self._reassign_wave_remaining(prepared_wave)
+
+        prepared_wave_index = prepared_wave.wave_index
+        self._discard_wave_matches(prepared_wave)
+        self.state.prepared_wave = None
+
+        if self.current_wave_complete() or not self.pending_current_wave():
+            try:
+                self._build_wave_plan(prepared_wave_index, relaxed=False, target="prepared")
+            except ValueError:
+                self._build_wave_plan(prepared_wave_index, relaxed=True, target="prepared")
+            return True
+        return False
+
+    def recompute_pairing(self, notify: bool = True, preserve_match_ids: Optional[set[str]] = None) -> bool:
+        if self.state.phase != "SWISS":
+            return False
+        if self.swiss_complete():
+            if notify:
+                self._notify_change()
+            return False
+        changed = False
+        if self.state.current_wave is None or self.current_wave_complete():
+            self._discard_open_swiss_plans(preserve_match_ids=preserve_match_ids)
+            next_wave_index = self.state.wave_index + 1 if self.state.wave_index else 1
+            try:
+                self._build_wave_plan(next_wave_index, relaxed=False, target="current")
+            except ValueError:
+                self._build_wave_plan(next_wave_index, relaxed=True, target="current")
+            changed = True
+        elif self.pending_current_wave():
+            changed = False
+        elif self.state.prepared_wave:
+            changed = self._recompute_prepared_wave()
+        elif self._maybe_prepare_next_wave():
+            changed = True
+        if changed:
+            self.log("Pairing neu berechnet.")
+        if notify:
+            self._notify_change()
+        return changed
+
     # ------------------------------------------------------------------
     # Tournament setup
     # ------------------------------------------------------------------
@@ -630,7 +890,7 @@ class SwissTournamentEngine:
                         "slot": match.slot_label,
                         "team_a": self.team_name(team_a_id),
                         "team_b": self.team_name(team_b_id),
-                        "status": "Macht euch bereit",
+                        "status": "Wir bitten sie, sich Spielbereit zu halten. Die Firma Dankt für Ihr Verständnis.",
                         "wave_order": match.wave_order,
                     }
                 )
@@ -666,18 +926,7 @@ class SwissTournamentEngine:
         is_overtime: bool,
         loser_cups_hit: int,
     ) -> None:
-        if is_overtime:
-            if loser_cups_hit < 10 or loser_cups_hit > 12:
-                raise ValueError("In OT muss der Verlierer zwischen 10 und 12 Becher getroffen haben.")
-            winner_points, loser_points = 2, 1
-            winner_cup_change = 13 - loser_cups_hit
-            loser_cup_change = 0
-        else:
-            if loser_cups_hit < 0 or loser_cups_hit > 9:
-                raise ValueError("Ohne OT muss der Verlierer zwischen 0 und 9 Becher getroffen haben.")
-            winner_points, loser_points = 3, 0
-            winner_cup_change = 10 - loser_cups_hit
-            loser_cup_change = -winner_cup_change
+        winner_points, loser_points, winner_cup_change, loser_cup_change = self._swiss_result_values(is_overtime, loser_cups_hit)
 
         winner = self.get_team(winner_team_id)
         loser = self.get_team(loser_team_id)
@@ -732,7 +981,7 @@ class SwissTournamentEngine:
                     self._build_wave_plan(self.state.wave_index + 1, relaxed=True, target="current")
             else:
                 if not self.state.active_tables:
-                    self.start_knockout()
+                    self.log("Swiss-Phase abgeschlossen. KO kann jetzt manuell gestartet werden.")
 
         if freed_table is not None:
             self._activate_next_match_on_table(freed_table)
@@ -743,6 +992,12 @@ class SwissTournamentEngine:
     # ------------------------------------------------------------------
 
     def start_knockout(self) -> None:
+        if self.state.phase != "SWISS":
+            raise ValueError("KO kann nur aus der Swiss-Phase gestartet werden.")
+        if self.state.active_tables:
+            raise ValueError("Bitte erst alle laufenden Swiss-Spiele beenden.")
+        if not self.swiss_complete():
+            raise ValueError("KO kann erst nach allen Swiss-Spielen gestartet werden.")
         self.state.phase = "KO"
         self.state.prepared_wave = None
         ranking = self.ranking_rows()
