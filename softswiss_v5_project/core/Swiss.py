@@ -1,22 +1,28 @@
 from __future__ import annotations
 
 import time
+from math import ceil
 from typing import Callable, Dict, List, Optional
 
 from core.config import (
+    B_GROUP_TABLE_NUMBER,
     DEFAULT_GAME_CAP,
     DEFAULT_POINT_CAP,
     LOG_LIMIT,
+    B_GROUP_TABLE_LABEL,
+    B_GROUP_TEAM_COUNT,
     PHASE_LABELS,
     PREVIEW_MATCHES,
     SWISS_GAMES_PER_TEAM,
     SWISS_MATCHES_PER_WAVE,
+    SWISS_PRIMARY_TABLE_COUNT,
+    SWISS_WAVE_PREPARE_RATIO,
     SWISS_WAVES_TOTAL,
     TABLE_COUNT,
     TEAM_COUNT,
     TOP_CUT,
 )
-from core.models import KOSlot, Match, Team, TournamentState, WavePlan
+from core.models import BGroupMatch, BGroupState, BGroupTeam, KOSlot, Match, Team, TournamentState, WavePlan
 from core.scheduler import SlotParticipant, SoftSwissScheduler, WaveSlotSuggestion
 
 
@@ -60,9 +66,53 @@ class SwissTournamentEngine:
     def get_team(self, team_id: int) -> Team:
         return self.state.teams[team_id]
 
-    def free_tables(self) -> List[int]:
+    def _used_table_numbers(self) -> set[int]:
         used = {match.table for match in self.active_matches() if match.table is not None}
-        return [table for table in range(1, TABLE_COUNT + 1) if table not in used]
+        if self.b_group_active_match() is not None:
+            used.add(B_GROUP_TABLE_NUMBER)
+        return used
+
+    def _current_wave_finished_count(self) -> int:
+        return sum(1 for match in self.current_wave_matches() if match.status == "finished")
+
+    def _current_wave_prepare_threshold(self) -> int:
+        total = len(self.current_wave_matches()) or SWISS_MATCHES_PER_WAVE
+        return max(1, ceil(total * SWISS_WAVE_PREPARE_RATIO))
+
+    def _current_wave_ready_for_next_plan(self) -> bool:
+        if not self.state.current_wave or self.current_wave_complete():
+            return False
+        if self.pending_current_wave():
+            return False
+        return self._current_wave_finished_count() >= self._current_wave_prepare_threshold()
+
+    def _b_group_blocks_table_5_for_swiss(self) -> bool:
+        return self.state.b_group.phase not in {"SETUP", "FINISHED"} and any(
+            match.status in {"pending", "active"} for match in self.state.b_group.matches.values()
+        )
+
+    def _swiss_can_use_table_5(self) -> bool:
+        if self._b_group_blocks_table_5_for_swiss():
+            return False
+        if self.state.phase != "SWISS":
+            return True
+        if not self.state.current_wave or self.current_wave_complete():
+            return True
+        if self.pending_current_wave():
+            return True
+        if not self.state.prepared_wave:
+            return False
+        return self._current_wave_ready_for_next_plan() and self._pending_wave_is_plan_safe(self.state.prepared_wave)
+
+    def swiss_table_numbers(self) -> List[int]:
+        tables = list(range(1, SWISS_PRIMARY_TABLE_COUNT + 1))
+        if TABLE_COUNT >= B_GROUP_TABLE_NUMBER and self._swiss_can_use_table_5():
+            tables.append(B_GROUP_TABLE_NUMBER)
+        return tables
+
+    def free_tables(self) -> List[int]:
+        used = self._used_table_numbers()
+        return [table for table in self.swiss_table_numbers() if table not in used]
 
     def active_matches(self) -> List[Match]:
         return sorted(
@@ -130,6 +180,395 @@ class SwissTournamentEngine:
                 }
             )
         return rows
+
+    # ------------------------------------------------------------------
+    # B group
+    # ------------------------------------------------------------------
+
+    def _b_group_next_match_id(self) -> str:
+        match_id = f"B-{self.state.b_group.match_counter:04d}"
+        self.state.b_group.match_counter += 1
+        return match_id
+
+    def b_group_team_name(self, team_id: int) -> str:
+        team = self.state.b_group.teams.get(team_id)
+        return team.name if team else "-"
+
+    def b_group_team_names_text(self) -> str:
+        teams = sorted(self.state.b_group.teams.values(), key=lambda team: team.seed)
+        return "\n".join(team.name for team in teams)
+
+    def b_group_set_teams(self, names: List[str]) -> None:
+        clean_names = [name.strip() for name in names if name.strip()]
+        if len(clean_names) != B_GROUP_TEAM_COUNT:
+            raise ValueError(f"Die B-Gruppe braucht genau {B_GROUP_TEAM_COUNT} Teams.")
+        if len({name.lower() for name in clean_names}) != len(clean_names):
+            raise ValueError("Teamnamen in der B-Gruppe muessen eindeutig sein.")
+
+        b_group = self.state.b_group
+        if b_group.phase != "SETUP" and len(clean_names) != len(b_group.teams):
+            raise ValueError("Nach dem Start darf die Anzahl der B-Gruppen-Teams nicht geaendert werden.")
+
+        if b_group.phase == "SETUP":
+            b_group.teams = {
+                idx: BGroupTeam(id=idx, name=name, seed=idx)
+                for idx, name in enumerate(clean_names, start=1)
+            }
+            b_group.matches = {}
+            b_group.match_counter = 1
+            b_group.podium = []
+        else:
+            for idx, name in enumerate(clean_names, start=1):
+                if idx in b_group.teams:
+                    b_group.teams[idx].name = name
+        self._notify_change()
+
+    def b_group_start(self, names: Optional[List[str]] = None, table_label: str = B_GROUP_TABLE_LABEL) -> None:
+        if self.state.b_group.phase != "SETUP":
+            raise ValueError("Die B-Gruppe laeuft bereits. Zum Neustart bitte zuerst zuruecksetzen.")
+        if names is not None:
+            self.b_group_set_teams(names)
+        b_group = self.state.b_group
+        if len(b_group.teams) != B_GROUP_TEAM_COUNT:
+            raise ValueError(f"Die B-Gruppe braucht genau {B_GROUP_TEAM_COUNT} Teams.")
+
+        teams = sorted(b_group.teams.values(), key=lambda team: team.seed)
+        by_seed = {team.seed: team for team in teams}
+        round_robin_order = [
+            (1, 2, "Runde 1 - Spiel 1"),
+            (3, 4, "Runde 1 - Spiel 2"),
+            (1, 3, "Runde 2 - Spiel 1"),
+            (2, 4, "Runde 2 - Spiel 2"),
+            (1, 4, "Runde 3 - Spiel 1"),
+            (2, 3, "Runde 3 - Spiel 2"),
+        ]
+        b_group.phase = "ROUND_ROBIN"
+        b_group.matches = {}
+        b_group.match_counter = 1
+        b_group.podium = []
+        self._b_group_rebuild_derived_state()
+
+        for seed_a, seed_b, label in round_robin_order:
+            team_a = by_seed[seed_a]
+            team_b = by_seed[seed_b]
+            match_id = self._b_group_next_match_id()
+            b_group.matches[match_id] = BGroupMatch(
+                match_id=match_id,
+                stage="ROUND_ROBIN",
+                label=label,
+                team_a=team_a.id,
+                team_b=team_b.id,
+                table_label=B_GROUP_TABLE_LABEL,
+            )
+        self.log(f"B-Gruppe gestartet ({len(b_group.matches)} Gruppenspiele).")
+        self._b_group_activate_next_match_if_possible()
+        self._notify_change()
+
+    def _b_group_match_sort_key(self, match: BGroupMatch) -> tuple[int, str]:
+        stage_order = {"ROUND_ROBIN": 1, "SEMI": 2, "THIRD": 3, "FINAL": 4}
+        return stage_order.get(match.stage, 99), match.match_id
+
+    def b_group_active_match(self) -> Optional[BGroupMatch]:
+        active = [match for match in self.state.b_group.matches.values() if match.status == "active"]
+        if not active:
+            return None
+        return sorted(active, key=self._b_group_match_sort_key)[0]
+
+    def _b_group_pending_matches(self) -> List[BGroupMatch]:
+        return [
+            match
+            for match in sorted(self.state.b_group.matches.values(), key=self._b_group_match_sort_key)
+            if match.status == "pending"
+        ]
+
+    def b_group_table_status(self) -> str:
+        active = self.b_group_active_match()
+        if active:
+            return f"{B_GROUP_TABLE_LABEL}: B-Gruppe läuft"
+        if B_GROUP_TABLE_NUMBER in self.state.active_tables:
+            match = self.state.matches.get(self.state.active_tables[B_GROUP_TABLE_NUMBER])
+            if match:
+                return f"{B_GROUP_TABLE_LABEL}: Swiss belegt"
+        if self._b_group_pending_matches():
+            return f"{B_GROUP_TABLE_LABEL}: frei fuer B-Gruppe"
+        return f"{B_GROUP_TABLE_LABEL}: frei"
+
+    def _b_group_activate_next_match_if_possible(self) -> bool:
+        if self.state.b_group.phase in {"SETUP", "FINISHED"}:
+            return False
+        if self.b_group_active_match() is not None:
+            return False
+        if B_GROUP_TABLE_NUMBER in self.state.active_tables:
+            return False
+        pending = self._b_group_pending_matches()
+        if not pending:
+            return False
+        match = pending[0]
+        match.status = "active"
+        match.table_label = B_GROUP_TABLE_LABEL
+        self.log(f"{B_GROUP_TABLE_LABEL}: B-Gruppe - {self.b_group_team_name(match.team_a)} vs {self.b_group_team_name(match.team_b)} gestartet.")
+        return True
+
+    def _b_group_rebuild_derived_state(self) -> None:
+        b_group = self.state.b_group
+        for team in b_group.teams.values():
+            team.points = 0
+            team.cups_metric = 0
+            team.wins = 0
+            team.losses = 0
+            team.games_played = 0
+
+        for match in sorted(b_group.matches.values(), key=self._b_group_match_sort_key):
+            if match.stage != "ROUND_ROBIN" or match.status != "finished":
+                continue
+            if match.winner is None or match.loser is None:
+                continue
+            team_a = b_group.teams.get(match.team_a)
+            team_b = b_group.teams.get(match.team_b)
+            if not team_a or not team_b:
+                continue
+            loser_cups = match.loser_cups_hit if match.loser_cups_hit is not None else 0
+            cup_change = 10 - loser_cups
+            points_a = 3 if match.winner == match.team_a else 0
+            points_b = 3 if match.winner == match.team_b else 0
+            team_a.points += points_a
+            team_b.points += points_b
+            team_a.games_played += 1
+            team_b.games_played += 1
+            if match.winner == team_a.id:
+                team_a.cups_metric += cup_change
+                team_b.cups_metric -= cup_change
+                team_a.wins += 1
+                team_b.losses += 1
+            else:
+                team_b.cups_metric += cup_change
+                team_a.cups_metric -= cup_change
+                team_b.wins += 1
+                team_a.losses += 1
+
+    def b_group_ranking_rows(self) -> List[dict]:
+        self._b_group_rebuild_derived_state()
+        rows: List[dict] = []
+        teams = sorted(
+            self.state.b_group.teams.values(),
+            key=lambda team: (-team.points, -team.cups_metric, -team.wins, team.losses, team.seed),
+        )
+        for idx, team in enumerate(teams, start=1):
+            rows.append(
+                {
+                    "rank": idx,
+                    "team_id": team.id,
+                    "name": team.name,
+                    "points": team.points,
+                    "cups": team.cups_metric,
+                    "wins": team.wins,
+                    "losses": team.losses,
+                    "games": team.games_played,
+                }
+            )
+        return rows
+
+    def _b_group_round_robin_complete(self) -> bool:
+        rr_matches = [match for match in self.state.b_group.matches.values() if match.stage == "ROUND_ROBIN"]
+        return bool(rr_matches) and all(match.status == "finished" for match in rr_matches)
+
+    def _b_group_schedule_playoffs_if_ready(self) -> None:
+        b_group = self.state.b_group
+        if b_group.phase == "ROUND_ROBIN" and self._b_group_round_robin_complete():
+            if any(match.stage == "SEMI" for match in b_group.matches.values()):
+                b_group.phase = "PLAYOFF"
+                return
+
+            ranking = self.b_group_ranking_rows()
+            if len(ranking) != B_GROUP_TEAM_COUNT:
+                b_group.phase = "FINISHED"
+                return
+
+            semi_1_id = self._b_group_next_match_id()
+            b_group.matches[semi_1_id] = BGroupMatch(
+                match_id=semi_1_id,
+                stage="SEMI",
+                label="Halbfinale 1 (1 vs 4)",
+                team_a=ranking[0]["team_id"],
+                team_b=ranking[3]["team_id"],
+            )
+            semi_2_id = self._b_group_next_match_id()
+            b_group.matches[semi_2_id] = BGroupMatch(
+                match_id=semi_2_id,
+                stage="SEMI",
+                label="Halbfinale 2 (2 vs 3)",
+                team_a=ranking[1]["team_id"],
+                team_b=ranking[2]["team_id"],
+            )
+            b_group.phase = "PLAYOFF"
+            self.log("B-Gruppe: Halbfinals vorbereitet.")
+
+        semi_matches = [match for match in b_group.matches.values() if match.stage == "SEMI"]
+        if b_group.phase != "PLAYOFF" or not semi_matches:
+            return
+        if any(match.status != "finished" for match in semi_matches):
+            return
+        if any(match.stage in {"FINAL", "THIRD"} for match in b_group.matches.values()):
+            return
+
+        semi_matches.sort(key=self._b_group_match_sort_key)
+        first, second = semi_matches[0], semi_matches[1]
+        if first.winner is None or first.loser is None or second.winner is None or second.loser is None:
+            return
+
+        third_id = self._b_group_next_match_id()
+        b_group.matches[third_id] = BGroupMatch(
+            match_id=third_id,
+            stage="THIRD",
+            label="Spiel um Platz 3",
+            team_a=first.loser,
+            team_b=second.loser,
+        )
+        final_id = self._b_group_next_match_id()
+        b_group.matches[final_id] = BGroupMatch(
+            match_id=final_id,
+            stage="FINAL",
+            label="Finale",
+            team_a=first.winner,
+            team_b=second.winner,
+        )
+        self.log("B-Gruppe: Finale und Spiel um Platz 3 vorbereitet.")
+
+    def _b_group_update_podium_if_finished(self) -> None:
+        b_group = self.state.b_group
+        if b_group.phase != "PLAYOFF":
+            return
+        playoff_matches = [match for match in b_group.matches.values() if match.stage in {"FINAL", "THIRD"}]
+        if not playoff_matches or any(match.status != "finished" for match in playoff_matches):
+            return
+        final = next((match for match in playoff_matches if match.stage == "FINAL"), None)
+        if not final or final.winner is None or final.loser is None:
+            return
+        podium = [final.winner, final.loser]
+        third = next((match for match in playoff_matches if match.stage == "THIRD"), None)
+        if third and third.winner is not None:
+            podium.append(third.winner)
+        elif len(self.b_group_ranking_rows()) >= 3:
+            podium.append(self.b_group_ranking_rows()[2]["team_id"])
+        b_group.podium = podium
+        b_group.phase = "FINISHED"
+        self.log("B-Gruppe beendet.")
+
+    def b_group_submit_result(
+        self,
+        match_id: str,
+        winner_team_id: int,
+        loser_cups_hit: int = 0,
+        table_label: str = B_GROUP_TABLE_LABEL,
+    ) -> None:
+        self._b_group_store_result(match_id, winner_team_id, loser_cups_hit)
+        self._b_group_schedule_playoffs_if_ready()
+        self._b_group_update_podium_if_finished()
+        self._b_group_activate_next_match_if_possible()
+        match = self.state.b_group.matches[match_id]
+        self.log(f"B-Gruppe: {match.label} gespeichert.")
+        self._notify_change()
+
+    def _b_group_validate_loser_cups(self, loser_cups_hit: int) -> None:
+        if loser_cups_hit < 0 or loser_cups_hit > 9:
+            raise ValueError("Verlierer-Becher muessen zwischen 0 und 9 liegen.")
+
+    def _b_group_store_result(self, match_id: str, winner_team_id: int, loser_cups_hit: int) -> None:
+        b_group = self.state.b_group
+        match = b_group.matches.get(match_id)
+        if not match:
+            raise ValueError("Dieses B-Gruppen-Match gibt es nicht.")
+        if winner_team_id not in {match.team_a, match.team_b}:
+            raise ValueError("Das Sieger-Team gehoert nicht zu diesem B-Gruppen-Match.")
+        self._b_group_validate_loser_cups(loser_cups_hit)
+
+        loser_team_id = match.team_b if winner_team_id == match.team_a else match.team_a
+        match.status = "finished"
+        match.winner = winner_team_id
+        match.loser = loser_team_id
+        match.table_label = B_GROUP_TABLE_LABEL
+        match.loser_cups_hit = loser_cups_hit
+        if winner_team_id == match.team_a:
+            match.points_a = 3
+            match.points_b = 0
+        else:
+            match.points_a = 0
+            match.points_b = 3
+
+        self._b_group_rebuild_derived_state()
+
+    def _b_group_discard_matches_by_stage(self, stages: set[str]) -> None:
+        b_group = self.state.b_group
+        for match_id, match in list(b_group.matches.items()):
+            if match.stage in stages:
+                del b_group.matches[match_id]
+        b_group.podium = []
+
+    def b_group_edit_result(self, match_id: str, winner_team_id: int, loser_cups_hit: int) -> None:
+        match = self.state.b_group.matches.get(match_id)
+        if not match:
+            raise ValueError("Dieses B-Gruppen-Match gibt es nicht.")
+        if match.status != "finished":
+            raise ValueError("Nur gespeicherte B-Gruppen-Ergebnisse koennen bearbeitet werden.")
+
+        stage = match.stage
+        self._b_group_store_result(match_id, winner_team_id, loser_cups_hit)
+        b_group = self.state.b_group
+
+        if stage == "ROUND_ROBIN":
+            self._b_group_discard_matches_by_stage({"SEMI", "THIRD", "FINAL"})
+            b_group.phase = "ROUND_ROBIN"
+        elif stage == "SEMI":
+            self._b_group_discard_matches_by_stage({"THIRD", "FINAL"})
+            b_group.phase = "PLAYOFF"
+        elif stage in {"THIRD", "FINAL"} and b_group.phase == "FINISHED":
+            b_group.phase = "PLAYOFF"
+
+        self._b_group_schedule_playoffs_if_ready()
+        self._b_group_update_podium_if_finished()
+        self._b_group_activate_next_match_if_possible()
+        self.log(f"B-Gruppe: {match.label} bearbeitet.")
+        self._notify_change()
+
+    def b_group_reset(self) -> None:
+        self.state.b_group = BGroupState()
+        self._notify_change()
+
+    def b_group_match_rows(self) -> List[dict]:
+        rows: List[dict] = []
+        for match in sorted(self.state.b_group.matches.values(), key=self._b_group_match_sort_key):
+            if match.status == "active":
+                status_text = "läuft"
+            elif match.status == "finished":
+                status_text = "fertig"
+            else:
+                status_text = "wartet"
+            rows.append(
+                {
+                    "match_id": match.match_id,
+                    "label": match.label,
+                    "stage": match.stage,
+                    "table": match.table_label,
+                    "team_a": self.b_group_team_name(match.team_a),
+                    "team_b": self.b_group_team_name(match.team_b),
+                    "status": match.status,
+                    "status_text": status_text,
+                    "winner": self.b_group_team_name(match.winner) if match.winner else "-",
+                    "points": (
+                        "-"
+                        if match.points_a is None or match.points_b is None
+                        else f"{match.points_a}:{match.points_b}"
+                    ),
+                    "loser_cups": "-" if match.loser_cups_hit is None else match.loser_cups_hit,
+                }
+            )
+        return rows
+
+    def b_group_next_match(self) -> Optional[dict]:
+        for row in self.b_group_match_rows():
+            if row["status"] == "pending":
+                return row
+        return None
 
     def swiss_complete(self) -> bool:
         return bool(self.state.teams) and all(team.swiss_games_played >= SWISS_GAMES_PER_TEAM for team in self.state.teams.values())
@@ -278,7 +717,7 @@ class SwissTournamentEngine:
 
         if self.swiss_complete():
             return
-        if self.current_wave_complete() or not self.pending_current_wave():
+        if self.current_wave_complete() or self._current_wave_ready_for_next_plan():
             try:
                 self._build_wave_plan(prepared_wave_index, relaxed=False, target="prepared")
             except ValueError:
@@ -358,7 +797,7 @@ class SwissTournamentEngine:
         self._discard_wave_matches(prepared_wave)
         self.state.prepared_wave = None
 
-        if self.current_wave_complete() or not self.pending_current_wave():
+        if self.current_wave_complete() or self._current_wave_ready_for_next_plan():
             try:
                 self._build_wave_plan(prepared_wave_index, relaxed=False, target="prepared")
             except ValueError:
@@ -389,6 +828,9 @@ class SwissTournamentEngine:
         elif self._maybe_prepare_next_wave():
             changed = True
         if changed:
+            started = self._activate_available_matches_on_free_tables()
+            changed = changed or started > 0
+        if changed:
             self.log("Pairing neu berechnet.")
         if notify:
             self._notify_change()
@@ -406,7 +848,9 @@ class SwissTournamentEngine:
         if len(clean_names) != TEAM_COUNT:
             raise ValueError(f"Es müssen genau {TEAM_COUNT} Teamnamen eingegeben werden.")
 
+        b_group = self.state.b_group
         self.reset()
+        self.state.b_group = b_group
         self.state.started_at = self.now()
         self.state.phase = "SWISS"
         self.state.wave_index = 1
@@ -759,9 +1203,7 @@ class SwissTournamentEngine:
             return False
         if self.current_wave_complete():
             return False
-        if self.pending_current_wave():
-            return False
-        if self.current_wave_remaining_active() > TABLE_COUNT:
+        if not self._current_wave_ready_for_next_plan():
             return False
         if self.state.wave_index >= SWISS_WAVES_TOTAL:
             return False
@@ -773,6 +1215,13 @@ class SwissTournamentEngine:
             return False
 
     def _activate_next_match_on_table(self, table: int) -> bool:
+        if table in self._used_table_numbers():
+            return False
+        if table == B_GROUP_TABLE_NUMBER:
+            if self._b_group_activate_next_match_if_possible():
+                return True
+            if table not in self.swiss_table_numbers():
+                return False
         match = self._next_resolvable_match_from_wave(self.state.current_wave)
         if match is None and self.state.prepared_wave is not None:
             match = self._next_resolvable_match_from_wave(self.state.prepared_wave)
@@ -792,13 +1241,27 @@ class SwissTournamentEngine:
         self.state.teams[match.team_b].active_match_id = match.match_id
         self.log(f"Tisch {table}: {self.team_name(match.team_a)} vs {self.team_name(match.team_b)} gestartet.")
 
+    def _activate_available_matches_on_free_tables(self) -> int:
+        count = 1 if self._b_group_activate_next_match_if_possible() else 0
+        for table in list(self.free_tables()):
+            if self._activate_next_match_on_table(table):
+                count += 1
+        return count
+
     def fill_free_tables(self, relaxed: bool = False) -> int:
         if self.state.phase != "SWISS":
-            return 0
+            count = 1 if self._b_group_activate_next_match_if_possible() else 0
+            if count:
+                self._notify_change()
+            return count
+
+        count = 1 if self._b_group_activate_next_match_if_possible() else 0
 
         if not self.state.current_wave:
             if self.state.wave_index >= SWISS_WAVES_TOTAL:
-                return 0
+                if count:
+                    self._notify_change()
+                return count
             try:
                 self._build_wave_plan(self.state.wave_index + 1 if self.state.wave_index else 1, relaxed=relaxed, target="current")
             except ValueError:
@@ -810,15 +1273,13 @@ class SwissTournamentEngine:
             elif self.state.wave_index < SWISS_WAVES_TOTAL:
                 self._build_wave_plan(self.state.wave_index + 1, relaxed=relaxed, target="current")
             else:
-                return 0
+                if count:
+                    self._notify_change()
+                return count
 
         prepared_created = self._maybe_prepare_next_wave()
 
-        free_tables = self.free_tables()
-        count = 0
-        for table in free_tables:
-            if self._activate_next_match_on_table(table):
-                count += 1
+        count += self._activate_available_matches_on_free_tables()
         prepared_created = self._maybe_prepare_next_wave() or prepared_created
         if count or prepared_created:
             self._notify_change()
@@ -890,7 +1351,7 @@ class SwissTournamentEngine:
                         "slot": match.slot_label,
                         "team_a": self.team_name(team_a_id),
                         "team_b": self.team_name(team_b_id),
-                        "status": "Wir bitten sie, sich Spielbereit zu halten. Die Firma Dankt für Ihr Verständnis.",
+                        "status": "Wir bitten Sie, sich Spielbereit und in Abrufnähe zu halten. Da Verein Dankt.",
                         "wave_order": match.wave_order,
                     }
                 )
@@ -984,7 +1445,7 @@ class SwissTournamentEngine:
                     self.log("Swiss-Phase abgeschlossen. KO kann jetzt manuell gestartet werden.")
 
         if freed_table is not None:
-            self._activate_next_match_on_table(freed_table)
+            self._activate_available_matches_on_free_tables()
             self._maybe_prepare_next_wave()
 
     # ------------------------------------------------------------------
@@ -1162,7 +1623,22 @@ class SwissTournamentEngine:
     # Display helpers
     # ------------------------------------------------------------------
 
-    def active_matches_rows(self) -> List[dict]:
+    def _waiting_table_numbers(self) -> List[int]:
+        if self.state.phase != "SWISS" or not self.state.current_wave:
+            return []
+        if self.pending_current_wave() or self.current_wave_complete():
+            return []
+        waiting_tables = []
+        used = self._used_table_numbers()
+        for table in range(1, TABLE_COUNT + 1):
+            if table in used:
+                continue
+            if table == B_GROUP_TABLE_NUMBER and table not in self.swiss_table_numbers():
+                continue
+            waiting_tables.append(table)
+        return waiting_tables
+
+    def active_matches_rows(self, include_b_group: bool = False, include_waiting: bool = False) -> List[dict]:
         rows: List[dict] = []
         for match in self.active_matches():
             rows.append(
@@ -1176,6 +1652,34 @@ class SwissTournamentEngine:
                     "team_b": self.team_name(match.team_b),
                 }
             )
+        if include_b_group:
+            b_match = self.b_group_active_match()
+            if b_match:
+                rows.append(
+                    {
+                        "table": B_GROUP_TABLE_NUMBER,
+                        "phase": "B-GRUPPE",
+                        "slot": b_match.label,
+                        "team_a_id": b_match.team_a,
+                        "team_b_id": b_match.team_b,
+                        "team_a": self.b_group_team_name(b_match.team_a),
+                        "team_b": self.b_group_team_name(b_match.team_b),
+                    }
+                )
+        if include_waiting:
+            for table in self._waiting_table_numbers():
+                rows.append(
+                    {
+                        "table": table,
+                        "phase": "WAITING",
+                        "slot": "",
+                        "team_a_id": None,
+                        "team_b_id": None,
+                        "team_a": "Wartet auf weitere Daten",
+                        "team_b": "",
+                    }
+                )
+        rows.sort(key=lambda row: row["table"] or 999)
         return rows
 
     def progress_text(self) -> str:
@@ -1183,10 +1687,13 @@ class SwissTournamentEngine:
             current_wave = self.state.current_wave.wave_index if self.state.current_wave else 0
             next_wave = self.state.prepared_wave.wave_index if self.state.prepared_wave else None
             suffix = f" | Next vorbereitet: W{next_wave}" if next_wave is not None else ""
+            if self.state.current_wave and not self.current_wave_complete() and next_wave is None:
+                suffix += f" | Next ab {self._current_wave_prepare_threshold()} fertigen Spielen"
+            suffix += f" | {self.b_group_table_status()}"
             return (
                 f"Swiss Welle {current_wave}/{SWISS_WAVES_TOTAL} | "
                 f"{self.swiss_finished_matches()}/{self.swiss_total_matches()} Spiele beendet | "
-                f"aktive Tische: {len(self.active_matches())}{suffix}"
+                f"aktive Tische: {len(self.active_matches_rows(include_b_group=True))}{suffix}"
             )
         if self.state.phase == "KO":
             finished = sum(1 for slot in self.state.ko_slots.values() if slot.status == "finished")

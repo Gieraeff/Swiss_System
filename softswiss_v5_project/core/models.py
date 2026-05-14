@@ -207,6 +207,120 @@ class WavePlan:
 
 
 @dataclass
+class BGroupTeam:
+    id: int
+    name: str
+    seed: int
+    points: int = 0
+    cups_metric: int = 0
+    wins: int = 0
+    losses: int = 0
+    games_played: int = 0
+
+    def to_dict(self) -> dict:
+        return {
+            "id": self.id,
+            "name": self.name,
+            "seed": self.seed,
+            "points": self.points,
+            "cups_metric": self.cups_metric,
+            "wins": self.wins,
+            "losses": self.losses,
+            "games_played": self.games_played,
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "BGroupTeam":
+        return cls(
+            id=int(data["id"]),
+            name=str(data["name"]),
+            seed=int(data["seed"]),
+            points=int(data.get("points", 0)),
+            cups_metric=int(data.get("cups_metric", 0)),
+            wins=int(data.get("wins", 0)),
+            losses=int(data.get("losses", 0)),
+            games_played=int(data.get("games_played", 0)),
+        )
+
+
+@dataclass
+class BGroupMatch:
+    match_id: str
+    stage: str
+    label: str
+    team_a: int
+    team_b: int
+    table_label: str = "Tisch 5"
+    status: str = "pending"
+    winner: Optional[int] = None
+    loser: Optional[int] = None
+    points_a: Optional[int] = None
+    points_b: Optional[int] = None
+    loser_cups_hit: Optional[int] = None
+
+    def to_dict(self) -> dict:
+        return {
+            "match_id": self.match_id,
+            "stage": self.stage,
+            "label": self.label,
+            "team_a": self.team_a,
+            "team_b": self.team_b,
+            "table_label": self.table_label,
+            "status": self.status,
+            "winner": self.winner,
+            "loser": self.loser,
+            "points_a": self.points_a,
+            "points_b": self.points_b,
+            "loser_cups_hit": self.loser_cups_hit,
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "BGroupMatch":
+        return cls(
+            match_id=str(data["match_id"]),
+            stage=str(data["stage"]),
+            label=str(data["label"]),
+            team_a=int(data["team_a"]),
+            team_b=int(data["team_b"]),
+            table_label=str(data.get("table_label", "Tisch 5")),
+            status=str(data.get("status", "pending")),
+            winner=(int(data["winner"]) if data.get("winner") is not None else None),
+            loser=(int(data["loser"]) if data.get("loser") is not None else None),
+            points_a=(int(data["points_a"]) if data.get("points_a") is not None else None),
+            points_b=(int(data["points_b"]) if data.get("points_b") is not None else None),
+            loser_cups_hit=(int(data["loser_cups_hit"]) if data.get("loser_cups_hit") is not None else None),
+        )
+
+
+@dataclass
+class BGroupState:
+    phase: str = "SETUP"
+    match_counter: int = 1
+    teams: Dict[int, BGroupTeam] = field(default_factory=dict)
+    matches: Dict[str, BGroupMatch] = field(default_factory=dict)
+    podium: List[int] = field(default_factory=list)
+
+    def to_dict(self) -> dict:
+        return {
+            "phase": self.phase,
+            "match_counter": self.match_counter,
+            "teams": [team.to_dict() for team in self.teams.values()],
+            "matches": {match_id: match.to_dict() for match_id, match in self.matches.items()},
+            "podium": list(self.podium),
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "BGroupState":
+        state = cls()
+        state.phase = str(data.get("phase", "SETUP"))
+        state.match_counter = int(data.get("match_counter", 1))
+        state.teams = {int(team_data["id"]): BGroupTeam.from_dict(team_data) for team_data in data.get("teams", [])}
+        state.matches = {str(match_id): BGroupMatch.from_dict(match_data) for match_id, match_data in data.get("matches", {}).items()}
+        state.podium = [int(x) for x in data.get("podium", [])]
+        return state
+
+
+@dataclass
 class TournamentState:
     phase: str = "SETUP"
     started_at: float = 0.0
@@ -222,6 +336,7 @@ class TournamentState:
     logs: List[str] = field(default_factory=list)
     podium: List[int] = field(default_factory=list)
     top4: List[int] = field(default_factory=list)
+    b_group: BGroupState = field(default_factory=BGroupState)
     last_save_ts: float = 0.0
     last_save_label: str = ""
     autosave_count: int = 0
@@ -242,6 +357,7 @@ class TournamentState:
             "logs": list(self.logs),
             "podium": list(self.podium),
             "top4": list(self.top4),
+            "b_group": self.b_group.to_dict(),
             "last_save_ts": self.last_save_ts,
             "last_save_label": self.last_save_label,
             "autosave_count": self.autosave_count,
@@ -264,6 +380,7 @@ class TournamentState:
         state.logs = [str(x) for x in data.get("logs", [])]
         state.podium = [int(x) for x in data.get("podium", [])]
         state.top4 = [int(x) for x in data.get("top4", [])]
+        state.b_group = BGroupState.from_dict(data["b_group"]) if data.get("b_group") else BGroupState()
         state.last_save_ts = float(data.get("last_save_ts", 0.0))
         state.last_save_label = str(data.get("last_save_label", ""))
         state.autosave_count = int(data.get("autosave_count", 0))
