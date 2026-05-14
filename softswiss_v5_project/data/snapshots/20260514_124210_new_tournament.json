@@ -1,15 +1,15 @@
 {
-  "saved_at": "2026-05-04T14:56:30",
+  "saved_at": "2026-05-14T12:42:10",
   "label": "new_tournament",
   "state": {
     "phase": "SWISS",
-    "started_at": 1777899389.9946816,
+    "started_at": 1778755329.849809,
     "match_counter": 13,
     "wave_index": 1,
     "teams": [
       {
         "id": 1,
-        "name": "Team 01",
+        "name": "Klatzköpfe",
         "seed": 1,
         "swiss_points": 0,
         "cups_metric": 0,
@@ -21,7 +21,7 @@
       },
       {
         "id": 2,
-        "name": "Team 02",
+        "name": "Dora & Boots",
         "seed": 2,
         "swiss_points": 0,
         "cups_metric": 0,
@@ -33,7 +33,7 @@
       },
       {
         "id": 3,
-        "name": "Team 03",
+        "name": "Fc Suff",
         "seed": 3,
         "swiss_points": 0,
         "cups_metric": 0,
@@ -45,7 +45,7 @@
       },
       {
         "id": 4,
-        "name": "Team 04",
+        "name": "Daniel und Maggi",
         "seed": 4,
         "swiss_points": 0,
         "cups_metric": 0,
@@ -57,7 +57,7 @@
       },
       {
         "id": 5,
-        "name": "Team 05",
+        "name": "Gut & Aussehend",
         "seed": 5,
         "swiss_points": 0,
         "cups_metric": 0,
@@ -69,7 +69,7 @@
       },
       {
         "id": 6,
-        "name": "Team 06",
+        "name": "Bob der Baumeister",
         "seed": 6,
         "swiss_points": 0,
         "cups_metric": 0,
@@ -81,7 +81,7 @@
       },
       {
         "id": 7,
-        "name": "Team 07",
+        "name": "Die Becherflüsterer",
         "seed": 7,
         "swiss_points": 0,
         "cups_metric": 0,
@@ -93,7 +93,7 @@
       },
       {
         "id": 8,
-        "name": "Team 08",
+        "name": "INSTANBUL CHAYAS",
         "seed": 8,
         "swiss_points": 0,
         "cups_metric": 0,
@@ -105,7 +105,7 @@
       },
       {
         "id": 9,
-        "name": "Team 09",
+        "name": "Becher TÜV",
         "seed": 9,
         "swiss_points": 0,
         "cups_metric": 0,
@@ -117,7 +117,7 @@
       },
       {
         "id": 10,
-        "name": "Team 10",
+        "name": "300g Hamsterhack",
         "seed": 10,
         "swiss_points": 0,
         "cups_metric": 0,
@@ -129,7 +129,7 @@
       },
       {
         "id": 11,
-        "name": "Team 11",
+        "name": "TEAM 51",
         "seed": 11,
         "swiss_points": 0,
         "cups_metric": 0,
@@ -141,7 +141,7 @@
       },
       {
         "id": 12,
-        "name": "Team 12",
+        "name": "Dildo Fight Club",
         "seed": 12,
         "swiss_points": 0,
         "cups_metric": 0,
@@ -153,7 +153,7 @@
       },
       {
         "id": 13,
-        "name": "Team 13",
+        "name": "Notnagel",
         "seed": 13,
         "swiss_points": 0,
         "cups_metric": 0,
@@ -165,7 +165,7 @@
       },
       {
         "id": 14,
-        "name": "Team 14",
+        "name": "Doktor Michi",
         "seed": 14,
         "swiss_points": 0,
         "cups_metric": 0,
@@ -177,7 +177,7 @@
       },
       {
         "id": 15,
-        "name": "Team 15",
+        "name": "Grußige Cowboys",
         "seed": 15,
         "swiss_points": 0,
         "cups_metric": 0,
@@ -189,7 +189,7 @@
       },
       {
         "id": 16,
-        "name": "Team 16",
+        "name": "Halda",
         "seed": 16,
         "swiss_points": 0,
         "cups_metric": 0,
@@ -201,7 +201,7 @@
       },
       {
         "id": 17,
-        "name": "Team 17",
+        "name": "Apex",
         "seed": 17,
         "swiss_points": 0,
         "cups_metric": 0,
@@ -213,7 +213,7 @@
       },
       {
         "id": 18,
-        "name": "Team 18",
+        "name": "69 Elite",
         "seed": 18,
         "swiss_points": 0,
         "cups_metric": 0,
@@ -225,7 +225,7 @@
       },
       {
         "id": 19,
-        "name": "Team 19",
+        "name": "Mario und Luigi",
         "seed": 19,
         "swiss_points": 0,
         "cups_metric": 0,
@@ -237,7 +237,7 @@
       },
       {
         "id": 20,
-        "name": "Team 20",
+        "name": "Promille Athleten",
         "seed": 20,
         "swiss_points": 0,
         "cups_metric": 0,
@@ -249,7 +249,7 @@
       },
       {
         "id": 21,
-        "name": "Team 21",
+        "name": "Die Becher Brüder",
         "seed": 21,
         "swiss_points": 0,
         "cups_metric": 0,
@@ -261,7 +261,7 @@
       },
       {
         "id": 22,
-        "name": "Team 22",
+        "name": "Motafon 1",
         "seed": 22,
         "swiss_points": 0,
         "cups_metric": 0,
@@ -273,7 +273,7 @@
       },
       {
         "id": 23,
-        "name": "Team 23",
+        "name": "Montafon 2",
         "seed": 23,
         "swiss_points": 0,
         "cups_metric": 0,
@@ -285,7 +285,7 @@
       },
       {
         "id": 24,
-        "name": "Team 24",
+        "name": "Bauer Beni",
         "seed": 24,
         "swiss_points": 0,
         "cups_metric": 0,
@@ -310,11 +310,20 @@
         "loser": null,
         "is_overtime": false,
         "loser_cups_hit": null,
-        "started_ts": 1777899390.4394941,
+        "started_ts": 1778755330.1771364,
         "ended_ts": null,
         "point_cap_used": 2,
         "game_cap_used": 1,
-        "slot_label": "W01-01"
+        "slot_label": "W01-01",
+        "is_placeholder": false,
+        "placeholder_a": "",
+        "placeholder_b": "",
+        "resolved_a": 23,
+        "resolved_b": 24,
+        "source_match_id_a": null,
+        "source_match_id_b": null,
+        "source_outcome_a": null,
+        "source_outcome_b": null
       },
       "W1-0002": {
         "match_id": "W1-0002",
@@ -329,11 +338,20 @@
         "loser": null,
         "is_overtime": false,
         "loser_cups_hit": null,
-        "started_ts": 1777899390.4395034,
+        "started_ts": 1778755330.1772103,
         "ended_ts": null,
         "point_cap_used": 2,
         "game_cap_used": 1,
-        "slot_label": "W01-02"
+        "slot_label": "W01-02",
+        "is_placeholder": false,
+        "placeholder_a": "",
+        "placeholder_b": "",
+        "resolved_a": 21,
+        "resolved_b": 22,
+        "source_match_id_a": null,
+        "source_match_id_b": null,
+        "source_outcome_a": null,
+        "source_outcome_b": null
       },
       "W1-0003": {
         "match_id": "W1-0003",
@@ -348,11 +366,20 @@
         "loser": null,
         "is_overtime": false,
         "loser_cups_hit": null,
-        "started_ts": 1777899390.4395072,
+        "started_ts": 1778755330.1772735,
         "ended_ts": null,
         "point_cap_used": 2,
         "game_cap_used": 1,
-        "slot_label": "W01-03"
+        "slot_label": "W01-03",
+        "is_placeholder": false,
+        "placeholder_a": "",
+        "placeholder_b": "",
+        "resolved_a": 19,
+        "resolved_b": 20,
+        "source_match_id_a": null,
+        "source_match_id_b": null,
+        "source_outcome_a": null,
+        "source_outcome_b": null
       },
       "W1-0004": {
         "match_id": "W1-0004",
@@ -367,11 +394,20 @@
         "loser": null,
         "is_overtime": false,
         "loser_cups_hit": null,
-        "started_ts": 1777899390.43951,
+        "started_ts": 1778755330.1773276,
         "ended_ts": null,
         "point_cap_used": 2,
         "game_cap_used": 1,
-        "slot_label": "W01-04"
+        "slot_label": "W01-04",
+        "is_placeholder": false,
+        "placeholder_a": "",
+        "placeholder_b": "",
+        "resolved_a": 17,
+        "resolved_b": 18,
+        "source_match_id_a": null,
+        "source_match_id_b": null,
+        "source_outcome_a": null,
+        "source_outcome_b": null
       },
       "W1-0005": {
         "match_id": "W1-0005",
@@ -390,7 +426,16 @@
         "ended_ts": null,
         "point_cap_used": 2,
         "game_cap_used": 1,
-        "slot_label": "W01-05"
+        "slot_label": "W01-05",
+        "is_placeholder": false,
+        "placeholder_a": "",
+        "placeholder_b": "",
+        "resolved_a": 15,
+        "resolved_b": 16,
+        "source_match_id_a": null,
+        "source_match_id_b": null,
+        "source_outcome_a": null,
+        "source_outcome_b": null
       },
       "W1-0006": {
         "match_id": "W1-0006",
@@ -409,7 +454,16 @@
         "ended_ts": null,
         "point_cap_used": 2,
         "game_cap_used": 1,
-        "slot_label": "W01-06"
+        "slot_label": "W01-06",
+        "is_placeholder": false,
+        "placeholder_a": "",
+        "placeholder_b": "",
+        "resolved_a": 13,
+        "resolved_b": 14,
+        "source_match_id_a": null,
+        "source_match_id_b": null,
+        "source_outcome_a": null,
+        "source_outcome_b": null
       },
       "W1-0007": {
         "match_id": "W1-0007",
@@ -428,7 +482,16 @@
         "ended_ts": null,
         "point_cap_used": 2,
         "game_cap_used": 1,
-        "slot_label": "W01-07"
+        "slot_label": "W01-07",
+        "is_placeholder": false,
+        "placeholder_a": "",
+        "placeholder_b": "",
+        "resolved_a": 11,
+        "resolved_b": 12,
+        "source_match_id_a": null,
+        "source_match_id_b": null,
+        "source_outcome_a": null,
+        "source_outcome_b": null
       },
       "W1-0008": {
         "match_id": "W1-0008",
@@ -447,7 +510,16 @@
         "ended_ts": null,
         "point_cap_used": 2,
         "game_cap_used": 1,
-        "slot_label": "W01-08"
+        "slot_label": "W01-08",
+        "is_placeholder": false,
+        "placeholder_a": "",
+        "placeholder_b": "",
+        "resolved_a": 9,
+        "resolved_b": 10,
+        "source_match_id_a": null,
+        "source_match_id_b": null,
+        "source_outcome_a": null,
+        "source_outcome_b": null
       },
       "W1-0009": {
         "match_id": "W1-0009",
@@ -466,7 +538,16 @@
         "ended_ts": null,
         "point_cap_used": 2,
         "game_cap_used": 1,
-        "slot_label": "W01-09"
+        "slot_label": "W01-09",
+        "is_placeholder": false,
+        "placeholder_a": "",
+        "placeholder_b": "",
+        "resolved_a": 7,
+        "resolved_b": 8,
+        "source_match_id_a": null,
+        "source_match_id_b": null,
+        "source_outcome_a": null,
+        "source_outcome_b": null
       },
       "W1-0010": {
         "match_id": "W1-0010",
@@ -485,7 +566,16 @@
         "ended_ts": null,
         "point_cap_used": 2,
         "game_cap_used": 1,
-        "slot_label": "W01-10"
+        "slot_label": "W01-10",
+        "is_placeholder": false,
+        "placeholder_a": "",
+        "placeholder_b": "",
+        "resolved_a": 5,
+        "resolved_b": 6,
+        "source_match_id_a": null,
+        "source_match_id_b": null,
+        "source_outcome_a": null,
+        "source_outcome_b": null
       },
       "W1-0011": {
         "match_id": "W1-0011",
@@ -504,7 +594,16 @@
         "ended_ts": null,
         "point_cap_used": 2,
         "game_cap_used": 1,
-        "slot_label": "W01-11"
+        "slot_label": "W01-11",
+        "is_placeholder": false,
+        "placeholder_a": "",
+        "placeholder_b": "",
+        "resolved_a": 3,
+        "resolved_b": 4,
+        "source_match_id_a": null,
+        "source_match_id_b": null,
+        "source_outcome_a": null,
+        "source_outcome_b": null
       },
       "W1-0012": {
         "match_id": "W1-0012",
@@ -523,7 +622,16 @@
         "ended_ts": null,
         "point_cap_used": 2,
         "game_cap_used": 1,
-        "slot_label": "W01-12"
+        "slot_label": "W01-12",
+        "is_placeholder": false,
+        "placeholder_a": "",
+        "placeholder_b": "",
+        "resolved_a": 1,
+        "resolved_b": 2,
+        "source_match_id_a": null,
+        "source_match_id_b": null,
+        "source_outcome_a": null,
+        "source_outcome_b": null
       }
     },
     "active_tables": {
@@ -549,22 +657,22 @@
         "W1-0011",
         "W1-0012"
       ],
-      "created_ts": 1777899390.4389203,
+      "created_ts": 1778755330.1766443,
       "status": "active"
     },
     "prepared_wave": null,
     "ko_slots": {},
     "logs": [
-      "[14:56:29] Neues Turnier gestartet.",
-      "[14:56:30] Welle 1 gestartet (12 Matches).",
-      "[14:56:30] Tisch 1: Team 23 vs Team 24 gestartet.",
-      "[14:56:30] Tisch 2: Team 21 vs Team 22 gestartet.",
-      "[14:56:30] Tisch 3: Team 19 vs Team 20 gestartet.",
-      "[14:56:30] Tisch 4: Team 17 vs Team 18 gestartet."
+      "[12:42:09] Neues Turnier gestartet.",
+      "[12:42:10] Welle 1 gestartet (12 Matches).",
+      "[12:42:10] Tisch 1: Montafon 2 vs Bauer Beni gestartet.",
+      "[12:42:10] Tisch 2: Die Becher Brüder vs Motafon 1 gestartet.",
+      "[12:42:10] Tisch 3: Mario und Luigi vs Promille Athleten gestartet.",
+      "[12:42:10] Tisch 4: Apex vs 69 Elite gestartet."
     ],
     "podium": [],
     "top4": [],
-    "last_save_ts": 1777899390.439568,
+    "last_save_ts": 1778755330.177391,
     "last_save_label": "new_tournament",
     "autosave_count": 1
   }
