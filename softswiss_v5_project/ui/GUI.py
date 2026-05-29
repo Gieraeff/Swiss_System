@@ -404,13 +404,14 @@ class TournamentGUI:
         self.winner_combo.grid(row=0, column=3, sticky="ew", pady=(0, 8))
 
         ttk.Checkbutton(entry_frame, text="Verlängerung", variable=self.ot_var, command=self.on_ot_toggle).grid(row=1, column=0, sticky="w")
-        ttk.Label(entry_frame, text="Verlierer-Becher", style="Card.TLabel").grid(row=1, column=2, sticky="w", padx=(12, 8))
-        self.loser_spin = ttk.Spinbox(entry_frame, textvariable=self.loser_cups_var, from_=0, to=12, width=10)
+        ttk.Label(entry_frame, text="Wie viele Becher stehen noch", style="Card.TLabel").grid(row=1, column=2, sticky="w", padx=(12, 8))
+        self.loser_spin = ttk.Spinbox(entry_frame, textvariable=self.loser_cups_var, from_=0, to=10, width=10)
         self.loser_spin.grid(row=1, column=3, sticky="w")
 
         self.ot_hint = ttk.Label(
             entry_frame,
-            text="Normal: 0-9 | OT: 10-12 | OT: Sieger bekommt Differenz, Verlierer 0",
+            text="Wie viele becher beim Sieger noch ston. " \
+            "Normal: 0-10 | Verlängerung: 1-3| Verlängerung: Sieger bekommt Differenz, Verlierer 0",
             style="CardMuted.TLabel",
         )
         self.ot_hint.grid(row=2, column=0, columnspan=4, sticky="w", pady=(8, 0))
@@ -556,8 +557,8 @@ class TournamentGUI:
 
         ttk.Label(result_card, text="Tisch", style="Card.TLabel").grid(row=2, column=0, sticky="w", padx=(0, 10), pady=(0, 8))
         ttk.Label(result_card, textvariable=self.b_group_table_var, style="CardTitle.TLabel").grid(row=2, column=1, sticky="w", pady=(0, 8))
-        ttk.Label(result_card, text="Verlierer-Becher", style="Card.TLabel").grid(row=2, column=2, sticky="w", padx=(14, 10), pady=(0, 8))
-        ttk.Spinbox(result_card, textvariable=self.b_group_loser_cups_var, from_=0, to=9, width=6).grid(row=2, column=3, sticky="w", pady=(0, 8))
+        ttk.Label(result_card, text="Wie viele Becher stehen noch ", style="Card.TLabel").grid(row=2, column=2, sticky="w", padx=(14, 10), pady=(0, 8))
+        ttk.Spinbox(result_card, textvariable=self.b_group_loser_cups_var, from_=0, to=10, width=6).grid(row=2, column=3, sticky="w", pady=(0, 8))
 
         ttk.Button(result_card, text="Ergebnis speichern", command=self.submit_b_group_result_from_gui, style="Action.TButton").grid(
             row=3,
@@ -1751,7 +1752,7 @@ class TournamentGUI:
             winner_combo["values"] = [self.engine.team_name(match.team_a), self.engine.team_name(match.team_b)]
             winner_var.set(self.engine.team_name(match.winner) if match.winner else self.engine.team_name(match.team_a))
             ot_var.set(match.is_overtime)
-            cups_var.set(str(match.loser_cups_hit if match.loser_cups_hit is not None else (10 if match.is_overtime else 0)))
+            cups_var.set(str(match.loser_cups_hit if match.loser_cups_hit is not None else 0))
 
         def save_edit() -> None:
             match = self.engine.state.matches[choices[match_var.get()]]
@@ -1836,7 +1837,7 @@ class TournamentGUI:
         self._refresh_winner_combo()
 
     def on_ot_toggle(self) -> None:
-        self.loser_cups_var.set("10" if self.ot_var.get() else "0")
+        self.loser_cups_var.set("0")
 
     def submit_result_from_gui(self) -> None:
         table = self._selected_table_number()

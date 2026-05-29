@@ -1,15 +1,15 @@
 {
-  "saved_at": "2026-05-14T16:16:05",
+  "saved_at": "2026-05-29T13:21:43",
   "label": "new_tournament",
   "state": {
     "phase": "SWISS",
-    "started_at": 1778768165.416019,
+    "started_at": 1780053702.8189163,
     "match_counter": 13,
     "wave_index": 1,
     "teams": [
       {
         "id": 1,
-        "name": "Klatzköpfe",
+        "name": "Team 01",
         "seed": 1,
         "swiss_points": 0,
         "cups_metric": 0,
@@ -21,7 +21,7 @@
       },
       {
         "id": 2,
-        "name": "Dora & Boots",
+        "name": "Team 02",
         "seed": 2,
         "swiss_points": 0,
         "cups_metric": 0,
@@ -33,7 +33,7 @@
       },
       {
         "id": 3,
-        "name": "Fc Suff",
+        "name": "Team 03",
         "seed": 3,
         "swiss_points": 0,
         "cups_metric": 0,
@@ -45,7 +45,7 @@
       },
       {
         "id": 4,
-        "name": "Daniel und Maggi",
+        "name": "Team 04",
         "seed": 4,
         "swiss_points": 0,
         "cups_metric": 0,
@@ -57,7 +57,7 @@
       },
       {
         "id": 5,
-        "name": "Gut & Aussehend",
+        "name": "Team 05",
         "seed": 5,
         "swiss_points": 0,
         "cups_metric": 0,
@@ -69,7 +69,7 @@
       },
       {
         "id": 6,
-        "name": "Bob der Baumeister",
+        "name": "Team 06",
         "seed": 6,
         "swiss_points": 0,
         "cups_metric": 0,
@@ -81,7 +81,7 @@
       },
       {
         "id": 7,
-        "name": "Die Becherflüsterer",
+        "name": "Team 07",
         "seed": 7,
         "swiss_points": 0,
         "cups_metric": 0,
@@ -93,7 +93,7 @@
       },
       {
         "id": 8,
-        "name": "INSTANBUL CHAYAS",
+        "name": "Team 08",
         "seed": 8,
         "swiss_points": 0,
         "cups_metric": 0,
@@ -105,7 +105,7 @@
       },
       {
         "id": 9,
-        "name": "Becher TÜV",
+        "name": "Team 09",
         "seed": 9,
         "swiss_points": 0,
         "cups_metric": 0,
@@ -117,7 +117,7 @@
       },
       {
         "id": 10,
-        "name": "300g Hamsterhack",
+        "name": "Team 10",
         "seed": 10,
         "swiss_points": 0,
         "cups_metric": 0,
@@ -129,7 +129,7 @@
       },
       {
         "id": 11,
-        "name": "TEAM 51",
+        "name": "Team 11",
         "seed": 11,
         "swiss_points": 0,
         "cups_metric": 0,
@@ -141,7 +141,7 @@
       },
       {
         "id": 12,
-        "name": "Dildo Fight Club",
+        "name": "Team 12",
         "seed": 12,
         "swiss_points": 0,
         "cups_metric": 0,
@@ -153,7 +153,7 @@
       },
       {
         "id": 13,
-        "name": "Notnagel",
+        "name": "Team 13",
         "seed": 13,
         "swiss_points": 0,
         "cups_metric": 0,
@@ -165,7 +165,7 @@
       },
       {
         "id": 14,
-        "name": "Doktor Michi",
+        "name": "Team 14",
         "seed": 14,
         "swiss_points": 0,
         "cups_metric": 0,
@@ -177,31 +177,31 @@
       },
       {
         "id": 15,
-        "name": "Grußige Cowboys",
+        "name": "Team 15",
         "seed": 15,
         "swiss_points": 0,
         "cups_metric": 0,
         "swiss_games_played": 0,
         "opponents": [],
         "last_finish_ts": 0.0,
-        "active_match_id": null,
+        "active_match_id": "W1-0005",
         "ko_seed": null
       },
       {
         "id": 16,
-        "name": "Halda",
+        "name": "Team 16",
         "seed": 16,
         "swiss_points": 0,
         "cups_metric": 0,
         "swiss_games_played": 0,
         "opponents": [],
         "last_finish_ts": 0.0,
-        "active_match_id": null,
+        "active_match_id": "W1-0005",
         "ko_seed": null
       },
       {
         "id": 17,
-        "name": "Apex",
+        "name": "Team 17",
         "seed": 17,
         "swiss_points": 0,
         "cups_metric": 0,
@@ -213,7 +213,7 @@
       },
       {
         "id": 18,
-        "name": "69 Elite",
+        "name": "Team 18",
         "seed": 18,
         "swiss_points": 0,
         "cups_metric": 0,
@@ -225,7 +225,7 @@
       },
       {
         "id": 19,
-        "name": "Mario und Luigi",
+        "name": "Team 19",
         "seed": 19,
         "swiss_points": 0,
         "cups_metric": 0,
@@ -237,7 +237,7 @@
       },
       {
         "id": 20,
-        "name": "Promille Athleten",
+        "name": "Team 20",
         "seed": 20,
         "swiss_points": 0,
         "cups_metric": 0,
@@ -249,7 +249,7 @@
       },
       {
         "id": 21,
-        "name": "Die Becher Brüder",
+        "name": "Team 21",
         "seed": 21,
         "swiss_points": 0,
         "cups_metric": 0,
@@ -261,7 +261,7 @@
       },
       {
         "id": 22,
-        "name": "Motafon 1",
+        "name": "Team 22",
         "seed": 22,
         "swiss_points": 0,
         "cups_metric": 0,
@@ -273,7 +273,7 @@
       },
       {
         "id": 23,
-        "name": "Montafon 2",
+        "name": "Team 23",
         "seed": 23,
         "swiss_points": 0,
         "cups_metric": 0,
@@ -285,7 +285,7 @@
       },
       {
         "id": 24,
-        "name": "Bauer Beni",
+        "name": "Team 24",
         "seed": 24,
         "swiss_points": 0,
         "cups_metric": 0,
@@ -310,7 +310,7 @@
         "loser": null,
         "is_overtime": false,
         "loser_cups_hit": null,
-        "started_ts": 1778768165.7393587,
+        "started_ts": 1780053703.2694588,
         "ended_ts": null,
         "point_cap_used": 2,
         "game_cap_used": 1,
@@ -338,7 +338,7 @@
         "loser": null,
         "is_overtime": false,
         "loser_cups_hit": null,
-        "started_ts": 1778768165.7394335,
+        "started_ts": 1780053703.269557,
         "ended_ts": null,
         "point_cap_used": 2,
         "game_cap_used": 1,
@@ -366,7 +366,7 @@
         "loser": null,
         "is_overtime": false,
         "loser_cups_hit": null,
-        "started_ts": 1778768165.7394981,
+        "started_ts": 1780053703.2696383,
         "ended_ts": null,
         "point_cap_used": 2,
         "game_cap_used": 1,
@@ -394,7 +394,7 @@
         "loser": null,
         "is_overtime": false,
         "loser_cups_hit": null,
-        "started_ts": 1778768165.739555,
+        "started_ts": 1780053703.2697108,
         "ended_ts": null,
         "point_cap_used": 2,
         "game_cap_used": 1,
@@ -412,17 +412,17 @@
       "W1-0005": {
         "match_id": "W1-0005",
         "phase": "SWISS",
-        "table": null,
+        "table": 5,
         "team_a": 15,
         "team_b": 16,
         "wave_index": 1,
         "wave_order": 5,
-        "status": "pending",
+        "status": "active",
         "winner": null,
         "loser": null,
         "is_overtime": false,
         "loser_cups_hit": null,
-        "started_ts": 0.0,
+        "started_ts": 1780053703.269824,
         "ended_ts": null,
         "point_cap_used": 2,
         "game_cap_used": 1,
@@ -638,7 +638,8 @@
       "1": "W1-0001",
       "2": "W1-0002",
       "3": "W1-0003",
-      "4": "W1-0004"
+      "4": "W1-0004",
+      "5": "W1-0005"
     },
     "completed_match_ids": [],
     "current_wave": {
@@ -657,22 +658,30 @@
         "W1-0011",
         "W1-0012"
       ],
-      "created_ts": 1778768165.738923,
+      "created_ts": 1780053703.2687135,
       "status": "active"
     },
     "prepared_wave": null,
     "ko_slots": {},
     "logs": [
-      "[16:16:05] Neues Turnier gestartet.",
-      "[16:16:05] Welle 1 gestartet (12 Matches).",
-      "[16:16:05] Tisch 1: Montafon 2 vs Bauer Beni gestartet.",
-      "[16:16:05] Tisch 2: Die Becher Brüder vs Motafon 1 gestartet.",
-      "[16:16:05] Tisch 3: Mario und Luigi vs Promille Athleten gestartet.",
-      "[16:16:05] Tisch 4: Apex vs 69 Elite gestartet."
+      "[13:21:42] Neues Turnier gestartet.",
+      "[13:21:43] Welle 1 gestartet (12 Matches).",
+      "[13:21:43] Tisch 1: Team 23 vs Team 24 gestartet.",
+      "[13:21:43] Tisch 2: Team 21 vs Team 22 gestartet.",
+      "[13:21:43] Tisch 3: Team 19 vs Team 20 gestartet.",
+      "[13:21:43] Tisch 4: Team 17 vs Team 18 gestartet.",
+      "[13:21:43] Tisch 5: Team 15 vs Team 16 gestartet."
     ],
     "podium": [],
     "top4": [],
-    "last_save_ts": 1778768165.739606,
+    "b_group": {
+      "phase": "SETUP",
+      "match_counter": 1,
+      "teams": [],
+      "matches": {},
+      "podium": []
+    },
+    "last_save_ts": 1780053703.269938,
     "last_save_label": "new_tournament",
     "autosave_count": 1
   }

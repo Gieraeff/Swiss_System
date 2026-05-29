@@ -328,7 +328,7 @@ class SwissTournamentEngine:
             if not team_a or not team_b:
                 continue
             loser_cups = match.loser_cups_hit if match.loser_cups_hit is not None else 0
-            cup_change = 10 - loser_cups
+            '''cup_change = 10 - loser_cups'''
             points_a = 3 if match.winner == match.team_a else 0
             points_b = 3 if match.winner == match.team_b else 0
             team_a.points += points_a
@@ -336,13 +336,13 @@ class SwissTournamentEngine:
             team_a.games_played += 1
             team_b.games_played += 1
             if match.winner == team_a.id:
-                team_a.cups_metric += cup_change
-                team_b.cups_metric -= cup_change
+                team_a.cups_metric += loser_cups
+                team_b.cups_metric -= loser_cups
                 team_a.wins += 1
                 team_b.losses += 1
             else:
-                team_b.cups_metric += cup_change
-                team_a.cups_metric -= cup_change
+                team_b.cups_metric += loser_cups
+                team_a.cups_metric -= loser_cups
                 team_b.wins += 1
                 team_a.losses += 1
 
@@ -470,8 +470,8 @@ class SwissTournamentEngine:
         self._notify_change()
 
     def _b_group_validate_loser_cups(self, loser_cups_hit: int) -> None:
-        if loser_cups_hit < 0 or loser_cups_hit > 9:
-            raise ValueError("Verlierer-Becher muessen zwischen 0 und 9 liegen.")
+        if loser_cups_hit < 0 or loser_cups_hit > 10:
+            raise ValueError("Es muessen zwischen 0 und 10 noch stoh.")
 
     def _b_group_store_result(self, match_id: str, winner_team_id: int, loser_cups_hit: int) -> None:
         b_group = self.state.b_group
@@ -594,16 +594,16 @@ class SwissTournamentEngine:
 
     def _swiss_result_values(self, is_overtime: bool, loser_cups_hit: int) -> tuple[int, int, int, int]:
         if is_overtime:
-            if loser_cups_hit < 10 or loser_cups_hit > 12:
-                raise ValueError("In OT muss der Verlierer zwischen 10 und 12 Becher getroffen haben.")
+            if loser_cups_hit > 10 :
+                raise ValueError("Becher sind immer unter 10 du Öpfel")
             winner_points, loser_points = 2, 1
-            winner_cup_change = 13 - loser_cups_hit
+            winner_cup_change = loser_cups_hit
             loser_cup_change = 0
         else:
-            if loser_cups_hit < 0 or loser_cups_hit > 9:
-                raise ValueError("Ohne OT muss der Verlierer zwischen 0 und 9 Becher getroffen haben.")
+            if loser_cups_hit < 0 or loser_cups_hit > 10:
+                raise ValueError("Ohne OT muss beim sieger no 1 - 10 Becher stoh")
             winner_points, loser_points = 3, 0
-            winner_cup_change = 10 - loser_cups_hit
+            winner_cup_change = loser_cups_hit
             loser_cup_change = -winner_cup_change
         return winner_points, loser_points, winner_cup_change, loser_cup_change
 
@@ -1517,11 +1517,11 @@ class SwissTournamentEngine:
         loser_cups_hit: int,
     ) -> None:
         if is_overtime:
-            if loser_cups_hit < 10 or loser_cups_hit > 12:
-                raise ValueError("In OT muss der Verlierer zwischen 10 und 12 Becher getroffen haben.")
+            if loser_cups_hit > 10:
+                raise ValueError("es müan immer noch irgendwelche bechers stoh, oh im OT")
         else:
-            if loser_cups_hit < 0 or loser_cups_hit > 9:
-                raise ValueError("Ohne OT muss der Verlierer zwischen 0 und 9 Becher getroffen haben.")
+            if loser_cups_hit < 0 or loser_cups_hit > 10:
+                raise ValueError("Ohne OT müan noch zwischen 0 und 10 Becher stoh")
 
         finished_ts = self.now()
         team_a = self.get_team(match.team_a)
