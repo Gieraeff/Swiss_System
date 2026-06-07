@@ -1,9 +1,9 @@
 {
-  "saved_at": "2026-05-14T17:18:16",
+  "saved_at": "2026-06-07T19:25:35",
   "label": "new_tournament",
   "state": {
     "phase": "SWISS",
-    "started_at": 1778771895.9136744,
+    "started_at": 1780853134.8588514,
     "match_counter": 13,
     "wave_index": 1,
     "teams": [
@@ -310,7 +310,7 @@
         "loser": null,
         "is_overtime": false,
         "loser_cups_hit": null,
-        "started_ts": 1778771896.243875,
+        "started_ts": 1780853135.1870644,
         "ended_ts": null,
         "point_cap_used": 2,
         "game_cap_used": 1,
@@ -338,7 +338,7 @@
         "loser": null,
         "is_overtime": false,
         "loser_cups_hit": null,
-        "started_ts": 1778771896.2439508,
+        "started_ts": 1780853135.1871412,
         "ended_ts": null,
         "point_cap_used": 2,
         "game_cap_used": 1,
@@ -366,7 +366,7 @@
         "loser": null,
         "is_overtime": false,
         "loser_cups_hit": null,
-        "started_ts": 1778771896.2440152,
+        "started_ts": 1780853135.187206,
         "ended_ts": null,
         "point_cap_used": 2,
         "game_cap_used": 1,
@@ -394,7 +394,7 @@
         "loser": null,
         "is_overtime": false,
         "loser_cups_hit": null,
-        "started_ts": 1778771896.244071,
+        "started_ts": 1780853135.1872633,
         "ended_ts": null,
         "point_cap_used": 2,
         "game_cap_used": 1,
@@ -422,7 +422,7 @@
         "loser": null,
         "is_overtime": false,
         "loser_cups_hit": null,
-        "started_ts": 1778771896.2441537,
+        "started_ts": 1780853135.1873453,
         "ended_ts": null,
         "point_cap_used": 2,
         "game_cap_used": 1,
@@ -658,19 +658,19 @@
         "W1-0011",
         "W1-0012"
       ],
-      "created_ts": 1778771896.2433708,
+      "created_ts": 1780853135.1865757,
       "status": "active"
     },
     "prepared_wave": null,
     "ko_slots": {},
     "logs": [
-      "[17:18:15] Neues Turnier gestartet.",
-      "[17:18:16] Welle 1 gestartet (12 Matches).",
-      "[17:18:16] Tisch 1: Team 23 vs Team 24 gestartet.",
-      "[17:18:16] Tisch 2: Team 21 vs Team 22 gestartet.",
-      "[17:18:16] Tisch 3: Team 19 vs Team 20 gestartet.",
-      "[17:18:16] Tisch 4: Team 17 vs Team 18 gestartet.",
-      "[17:18:16] Tisch 5: Team 15 vs Team 16 gestartet."
+      "[19:25:34] Neues Turnier gestartet.",
+      "[19:25:35] Welle 1 gestartet (12 Matches).",
+      "[19:25:35] Tisch 1: Team 23 vs Team 24 gestartet.",
+      "[19:25:35] Tisch 2: Team 21 vs Team 22 gestartet.",
+      "[19:25:35] Tisch 3: Team 19 vs Team 20 gestartet.",
+      "[19:25:35] Tisch 4: Team 17 vs Team 18 gestartet.",
+      "[19:25:35] Tisch 5: Team 15 vs Team 16 gestartet."
     ],
     "podium": [],
     "top4": [],
@@ -681,7 +681,7 @@
       "matches": {},
       "podium": []
     },
-    "last_save_ts": 1778771896.244224,
+    "last_save_ts": 1780853135.187422,
     "last_save_label": "new_tournament",
     "autosave_count": 1
   }

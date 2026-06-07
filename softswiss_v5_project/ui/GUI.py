@@ -403,7 +403,9 @@ class TournamentGUI:
         self.winner_combo = ttk.Combobox(entry_frame, textvariable=self.selected_winner_var, state="readonly", width=28)
         self.winner_combo.grid(row=0, column=3, sticky="ew", pady=(0, 8))
 
-        ttk.Checkbutton(entry_frame, text="Verlängerung", variable=self.ot_var, command=self.on_ot_toggle).grid(row=1, column=0, sticky="w")
+        self.ot_check = tk.Checkbutton(entry_frame, text="Verlängerung", variable=self.ot_var, command=self.on_ot_toggle, bg=PUBLIC_THEME["card"], fg=PUBLIC_THEME["text"], activebackground=PUBLIC_THEME["card"],
+                                       activeforeground=PUBLIC_THEME["text"], selectcolor=PUBLIC_THEME["card"], font=("Segoe UI", 10),) 
+        self.ot_check.grid(row=1, column=0, sticky="w")
         ttk.Label(entry_frame, text="Wie viele Becher stehen noch", style="Card.TLabel").grid(row=1, column=2, sticky="w", padx=(12, 8))
         self.loser_spin = ttk.Spinbox(entry_frame, textvariable=self.loser_cups_var, from_=0, to=10, width=10)
         self.loser_spin.grid(row=1, column=3, sticky="w")
@@ -1836,8 +1838,12 @@ class TournamentGUI:
     def on_table_selected(self, _event: object = None) -> None:
         self._refresh_winner_combo()
 
-    def on_ot_toggle(self) -> None:
-        self.loser_cups_var.set("0")
+    def on_ot_toggle(self):
+        if self.ot_var.get():
+            self.ot_check.config(fg="red", font=("Segoe UI", 10, "bold"))
+        else:
+            self.ot_check.config(fg=PUBLIC_THEME["text"], font=("Segoe UI", 10))
+            
 
     def submit_result_from_gui(self) -> None:
         table = self._selected_table_number()

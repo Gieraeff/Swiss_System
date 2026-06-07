@@ -1,15 +1,15 @@
 {
-  "saved_at": "2026-05-14T17:28:01",
-  "label": "b_group_start",
+  "saved_at": "2026-06-07T19:17:13",
+  "label": "b_group_teams",
   "state": {
     "phase": "SWISS",
-    "started_at": 1778772435.9175792,
+    "started_at": 1780852608.3784387,
     "match_counter": 13,
     "wave_index": 1,
     "teams": [
       {
         "id": 1,
-        "name": "Klatzköpfe",
+        "name": "Team 01",
         "seed": 1,
         "swiss_points": 0,
         "cups_metric": 0,
@@ -21,7 +21,7 @@
       },
       {
         "id": 2,
-        "name": "Dora & Boots",
+        "name": "Team 02",
         "seed": 2,
         "swiss_points": 0,
         "cups_metric": 0,
@@ -33,7 +33,7 @@
       },
       {
         "id": 3,
-        "name": "Fc Suff",
+        "name": "Team 03",
         "seed": 3,
         "swiss_points": 0,
         "cups_metric": 0,
@@ -45,7 +45,7 @@
       },
       {
         "id": 4,
-        "name": "Daniel und Maggi",
+        "name": "Team 04",
         "seed": 4,
         "swiss_points": 0,
         "cups_metric": 0,
@@ -57,7 +57,7 @@
       },
       {
         "id": 5,
-        "name": "Gut & Aussehend",
+        "name": "Team 05",
         "seed": 5,
         "swiss_points": 0,
         "cups_metric": 0,
@@ -69,7 +69,7 @@
       },
       {
         "id": 6,
-        "name": "Bob der Baumeister",
+        "name": "Team 06",
         "seed": 6,
         "swiss_points": 0,
         "cups_metric": 0,
@@ -81,7 +81,7 @@
       },
       {
         "id": 7,
-        "name": "Die Becherflüsterer",
+        "name": "Team 07",
         "seed": 7,
         "swiss_points": 0,
         "cups_metric": 0,
@@ -93,7 +93,7 @@
       },
       {
         "id": 8,
-        "name": "INSTANBUL CHAYAS",
+        "name": "Team 08",
         "seed": 8,
         "swiss_points": 0,
         "cups_metric": 0,
@@ -105,7 +105,7 @@
       },
       {
         "id": 9,
-        "name": "Becher TÜV",
+        "name": "Team 09",
         "seed": 9,
         "swiss_points": 0,
         "cups_metric": 0,
@@ -117,7 +117,7 @@
       },
       {
         "id": 10,
-        "name": "300g Hamsterhack",
+        "name": "Team 10",
         "seed": 10,
         "swiss_points": 0,
         "cups_metric": 0,
@@ -129,7 +129,7 @@
       },
       {
         "id": 11,
-        "name": "TEAM 51",
+        "name": "Team 11",
         "seed": 11,
         "swiss_points": 0,
         "cups_metric": 0,
@@ -141,7 +141,7 @@
       },
       {
         "id": 12,
-        "name": "Dildo Fight Club",
+        "name": "Team 12",
         "seed": 12,
         "swiss_points": 0,
         "cups_metric": 0,
@@ -153,7 +153,7 @@
       },
       {
         "id": 13,
-        "name": "Notnagel",
+        "name": "Team 13",
         "seed": 13,
         "swiss_points": 0,
         "cups_metric": 0,
@@ -165,7 +165,7 @@
       },
       {
         "id": 14,
-        "name": "Doktor Michi",
+        "name": "Team 14",
         "seed": 14,
         "swiss_points": 0,
         "cups_metric": 0,
@@ -177,7 +177,7 @@
       },
       {
         "id": 15,
-        "name": "Grußige Cowboys",
+        "name": "Team 15",
         "seed": 15,
         "swiss_points": 0,
         "cups_metric": 0,
@@ -189,7 +189,7 @@
       },
       {
         "id": 16,
-        "name": "Halda",
+        "name": "Team 16",
         "seed": 16,
         "swiss_points": 0,
         "cups_metric": 0,
@@ -201,7 +201,7 @@
       },
       {
         "id": 17,
-        "name": "Apex",
+        "name": "Team 17",
         "seed": 17,
         "swiss_points": 0,
         "cups_metric": 0,
@@ -213,7 +213,7 @@
       },
       {
         "id": 18,
-        "name": "69 Elite",
+        "name": "Team 18",
         "seed": 18,
         "swiss_points": 0,
         "cups_metric": 0,
@@ -225,7 +225,7 @@
       },
       {
         "id": 19,
-        "name": "Mario und Luigi",
+        "name": "Team 19",
         "seed": 19,
         "swiss_points": 0,
         "cups_metric": 0,
@@ -237,7 +237,7 @@
       },
       {
         "id": 20,
-        "name": "Promille Athleten",
+        "name": "Team 20",
         "seed": 20,
         "swiss_points": 0,
         "cups_metric": 0,
@@ -249,7 +249,7 @@
       },
       {
         "id": 21,
-        "name": "Die Becher Brüder",
+        "name": "Team 21",
         "seed": 21,
         "swiss_points": 0,
         "cups_metric": 0,
@@ -261,7 +261,7 @@
       },
       {
         "id": 22,
-        "name": "Motafon 1",
+        "name": "Team 22",
         "seed": 22,
         "swiss_points": 0,
         "cups_metric": 0,
@@ -273,7 +273,7 @@
       },
       {
         "id": 23,
-        "name": "Montafon 2",
+        "name": "Team 23",
         "seed": 23,
         "swiss_points": 0,
         "cups_metric": 0,
@@ -285,7 +285,7 @@
       },
       {
         "id": 24,
-        "name": "Bauer Beni",
+        "name": "Team 24",
         "seed": 24,
         "swiss_points": 0,
         "cups_metric": 0,
@@ -310,7 +310,7 @@
         "loser": null,
         "is_overtime": false,
         "loser_cups_hit": null,
-        "started_ts": 1778772436.249989,
+        "started_ts": 1780852608.7045875,
         "ended_ts": null,
         "point_cap_used": 2,
         "game_cap_used": 1,
@@ -338,7 +338,7 @@
         "loser": null,
         "is_overtime": false,
         "loser_cups_hit": null,
-        "started_ts": 1778772436.2500632,
+        "started_ts": 1780852608.7046642,
         "ended_ts": null,
         "point_cap_used": 2,
         "game_cap_used": 1,
@@ -366,7 +366,7 @@
         "loser": null,
         "is_overtime": false,
         "loser_cups_hit": null,
-        "started_ts": 1778772436.2501268,
+        "started_ts": 1780852608.70473,
         "ended_ts": null,
         "point_cap_used": 2,
         "game_cap_used": 1,
@@ -394,7 +394,7 @@
         "loser": null,
         "is_overtime": false,
         "loser_cups_hit": null,
-        "started_ts": 1778772436.2501829,
+        "started_ts": 1780852608.7047892,
         "ended_ts": null,
         "point_cap_used": 2,
         "game_cap_used": 1,
@@ -422,7 +422,7 @@
         "loser": null,
         "is_overtime": false,
         "loser_cups_hit": null,
-        "started_ts": 1778772436.2502656,
+        "started_ts": 1780852608.7048757,
         "ended_ts": null,
         "point_cap_used": 2,
         "game_cap_used": 1,
@@ -658,148 +658,72 @@
         "W1-0011",
         "W1-0012"
       ],
-      "created_ts": 1778772436.2494457,
+      "created_ts": 1780852608.704081,
       "status": "active"
     },
     "prepared_wave": null,
     "ko_slots": {},
     "logs": [
-      "[17:27:15] Neues Turnier gestartet.",
-      "[17:27:16] Welle 1 gestartet (12 Matches).",
-      "[17:27:16] Tisch 1: Montafon 2 vs Bauer Beni gestartet.",
-      "[17:27:16] Tisch 2: Die Becher Brüder vs Motafon 1 gestartet.",
-      "[17:27:16] Tisch 3: Mario und Luigi vs Promille Athleten gestartet.",
-      "[17:27:16] Tisch 4: Apex vs 69 Elite gestartet.",
-      "[17:27:16] Tisch 5: Grußige Cowboys vs Halda gestartet.",
-      "[17:28:01] B-Gruppe gestartet (6 Gruppenspiele)."
+      "[19:16:48] Neues Turnier gestartet.",
+      "[19:16:48] Welle 1 gestartet (12 Matches).",
+      "[19:16:48] Tisch 1: Team 23 vs Team 24 gestartet.",
+      "[19:16:48] Tisch 2: Team 21 vs Team 22 gestartet.",
+      "[19:16:48] Tisch 3: Team 19 vs Team 20 gestartet.",
+      "[19:16:48] Tisch 4: Team 17 vs Team 18 gestartet.",
+      "[19:16:48] Tisch 5: Team 15 vs Team 16 gestartet."
     ],
     "podium": [],
     "top4": [],
     "b_group": {
-      "phase": "ROUND_ROBIN",
-      "match_counter": 7,
+      "phase": "SETUP",
+      "match_counter": 1,
       "teams": [
         {
           "id": 1,
-          "name": "Josef",
+          "name": "j",
           "seed": 1,
           "points": 0,
+          "cups_metric": 0,
           "wins": 0,
           "losses": 0,
           "games_played": 0
         },
         {
           "id": 2,
-          "name": "Daisy",
+          "name": "d",
           "seed": 2,
           "points": 0,
+          "cups_metric": 0,
           "wins": 0,
           "losses": 0,
           "games_played": 0
         },
         {
           "id": 3,
-          "name": "Gudrun",
+          "name": "s",
           "seed": 3,
           "points": 0,
+          "cups_metric": 0,
           "wins": 0,
           "losses": 0,
           "games_played": 0
         },
         {
           "id": 4,
-          "name": "Fabienne",
+          "name": "a",
           "seed": 4,
           "points": 0,
+          "cups_metric": 0,
           "wins": 0,
           "losses": 0,
           "games_played": 0
         }
       ],
-      "matches": {
-        "B-0001": {
-          "match_id": "B-0001",
-          "stage": "ROUND_ROBIN",
-          "label": "Runde 1 - Spiel 1",
-          "team_a": 1,
-          "team_b": 2,
-          "table_label": "Tisch 5",
-          "status": "pending",
-          "winner": null,
-          "loser": null,
-          "points_a": null,
-          "points_b": null
-        },
-        "B-0002": {
-          "match_id": "B-0002",
-          "stage": "ROUND_ROBIN",
-          "label": "Runde 1 - Spiel 2",
-          "team_a": 3,
-          "team_b": 4,
-          "table_label": "Tisch 5",
-          "status": "pending",
-          "winner": null,
-          "loser": null,
-          "points_a": null,
-          "points_b": null
-        },
-        "B-0003": {
-          "match_id": "B-0003",
-          "stage": "ROUND_ROBIN",
-          "label": "Runde 2 - Spiel 1",
-          "team_a": 1,
-          "team_b": 3,
-          "table_label": "Tisch 5",
-          "status": "pending",
-          "winner": null,
-          "loser": null,
-          "points_a": null,
-          "points_b": null
-        },
-        "B-0004": {
-          "match_id": "B-0004",
-          "stage": "ROUND_ROBIN",
-          "label": "Runde 2 - Spiel 2",
-          "team_a": 2,
-          "team_b": 4,
-          "table_label": "Tisch 5",
-          "status": "pending",
-          "winner": null,
-          "loser": null,
-          "points_a": null,
-          "points_b": null
-        },
-        "B-0005": {
-          "match_id": "B-0005",
-          "stage": "ROUND_ROBIN",
-          "label": "Runde 3 - Spiel 1",
-          "team_a": 1,
-          "team_b": 4,
-          "table_label": "Tisch 5",
-          "status": "pending",
-          "winner": null,
-          "loser": null,
-          "points_a": null,
-          "points_b": null
-        },
-        "B-0006": {
-          "match_id": "B-0006",
-          "stage": "ROUND_ROBIN",
-          "label": "Runde 3 - Spiel 2",
-          "team_a": 2,
-          "team_b": 3,
-          "table_label": "Tisch 5",
-          "status": "pending",
-          "winner": null,
-          "loser": null,
-          "points_a": null,
-          "points_b": null
-        }
-      },
+      "matches": {},
       "podium": []
     },
-    "last_save_ts": 1778772481.934646,
-    "last_save_label": "b_group_start",
-    "autosave_count": 3
+    "last_save_ts": 1780852633.31493,
+    "last_save_label": "b_group_teams",
+    "autosave_count": 2
   }
 }
