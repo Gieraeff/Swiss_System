@@ -37,7 +37,7 @@ class TournamentGUI:
         self.progress_var = tk.StringVar(value="Noch kein Turnier gestartet")
         self.status_var = tk.StringVar(value="Bereit.")
         self.save_var = tk.StringVar(value="Autosave: -")
-        self.top_hint_var = tk.StringVar(value="Top 8 kommen weiter")
+        self.top_hint_var = tk.StringVar(value="Top 8 kommen weiter / Punkte: Sieg = 3, Niederlage = 0, Sieg durch Verlängerung = 2, Niederlage druch Verlängerung = 1 / Cups = Sind die noch stehenden Becher beim Sieger, d.h. Stehen noch 3 Becher beim Sieger, bekommt er 3 Cups und der Verlierer -3  ")
 
         self.selected_table_var = tk.StringVar()
         self.selected_winner_var = tk.StringVar()
@@ -1915,6 +1915,8 @@ class TournamentGUI:
         try:
             self.engine.submit_result(table, winner_id, self.ot_var.get(), loser_cups)
             self.persist_state(label="result_entry", snapshot=False)
+            self.ot_var.set(False),
+            self.on_ot_toggle(),
             self.status_var.set("Ergebnis gespeichert.")
             self.refresh_all()
         except Exception as exc:
