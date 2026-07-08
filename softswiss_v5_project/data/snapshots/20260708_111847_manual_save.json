@@ -1,6 +1,6 @@
 {
-  "saved_at": "2026-07-08T11:19:15",
-  "label": "shutdown",
+  "saved_at": "2026-07-08T11:18:47",
+  "label": "manual_save",
   "state": {
     "phase": "SWISS",
     "started_at": 1783502135.643663,
@@ -1510,8 +1510,8 @@
       "matches": {},
       "podium": []
     },
-    "last_save_ts": 1783502355.292869,
-    "last_save_label": "shutdown",
-    "autosave_count": 31
+    "last_save_ts": 1783502327.261596,
+    "last_save_label": "manual_save",
+    "autosave_count": 27
   }
 }

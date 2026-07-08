@@ -336,7 +336,7 @@ class TournamentState:
     logs: List[str] = field(default_factory=list)
     podium: List[int] = field(default_factory=list)
     top4: List[int] = field(default_factory=list)
-    table_5_enabled: bool = True
+    table_5_enabled: bool = False
     b_group: BGroupState = field(default_factory=BGroupState)
     last_save_ts: float = 0.0
     last_save_label: str = ""

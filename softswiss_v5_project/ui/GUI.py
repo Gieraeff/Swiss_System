@@ -336,9 +336,9 @@ class TournamentGUI:
         pane = ttk.Panedwindow(self.control_tab, orient="horizontal")
         pane.pack(fill="both", expand=True)
 
-        left = ttk.Frame(pane, padding=(0, 0, 12, 0))
+        left_shell, left = self._scrollable_admin_column(pane, padding=(0, 0, 12, 0))
         right_shell, right = self._scrollable_admin_column(pane, padding=(12, 0, 0, 0))
-        pane.add(left, weight=3)
+        pane.add(left_shell, weight=3)
         pane.add(right_shell, weight=4)
 
         preview_shell, preview_frame = self._admin_card(right, "Next Match", "Vorbereitete Paarungen für freie Tische")

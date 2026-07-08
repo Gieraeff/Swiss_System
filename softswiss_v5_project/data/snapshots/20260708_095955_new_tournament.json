@@ -1,9 +1,9 @@
 {
-  "saved_at": "2026-06-07T19:25:35",
+  "saved_at": "2026-07-08T09:59:55",
   "label": "new_tournament",
   "state": {
     "phase": "SWISS",
-    "started_at": 1780853134.8588514,
+    "started_at": 1783497595.4074306,
     "match_counter": 13,
     "wave_index": 1,
     "teams": [
@@ -184,7 +184,7 @@
         "swiss_games_played": 0,
         "opponents": [],
         "last_finish_ts": 0.0,
-        "active_match_id": "W1-0005",
+        "active_match_id": null,
         "ko_seed": null
       },
       {
@@ -196,7 +196,7 @@
         "swiss_games_played": 0,
         "opponents": [],
         "last_finish_ts": 0.0,
-        "active_match_id": "W1-0005",
+        "active_match_id": null,
         "ko_seed": null
       },
       {
@@ -310,7 +310,7 @@
         "loser": null,
         "is_overtime": false,
         "loser_cups_hit": null,
-        "started_ts": 1780853135.1870644,
+        "started_ts": 1783497595.8679285,
         "ended_ts": null,
         "point_cap_used": 2,
         "game_cap_used": 1,
@@ -338,7 +338,7 @@
         "loser": null,
         "is_overtime": false,
         "loser_cups_hit": null,
-        "started_ts": 1780853135.1871412,
+        "started_ts": 1783497595.8680437,
         "ended_ts": null,
         "point_cap_used": 2,
         "game_cap_used": 1,
@@ -366,7 +366,7 @@
         "loser": null,
         "is_overtime": false,
         "loser_cups_hit": null,
-        "started_ts": 1780853135.187206,
+        "started_ts": 1783497595.86813,
         "ended_ts": null,
         "point_cap_used": 2,
         "game_cap_used": 1,
@@ -394,7 +394,7 @@
         "loser": null,
         "is_overtime": false,
         "loser_cups_hit": null,
-        "started_ts": 1780853135.1872633,
+        "started_ts": 1783497595.868203,
         "ended_ts": null,
         "point_cap_used": 2,
         "game_cap_used": 1,
@@ -412,17 +412,17 @@
       "W1-0005": {
         "match_id": "W1-0005",
         "phase": "SWISS",
-        "table": 5,
+        "table": null,
         "team_a": 15,
         "team_b": 16,
         "wave_index": 1,
         "wave_order": 5,
-        "status": "active",
+        "status": "pending",
         "winner": null,
         "loser": null,
         "is_overtime": false,
         "loser_cups_hit": null,
-        "started_ts": 1780853135.1873453,
+        "started_ts": 0.0,
         "ended_ts": null,
         "point_cap_used": 2,
         "game_cap_used": 1,
@@ -638,8 +638,7 @@
       "1": "W1-0001",
       "2": "W1-0002",
       "3": "W1-0003",
-      "4": "W1-0004",
-      "5": "W1-0005"
+      "4": "W1-0004"
     },
     "completed_match_ids": [],
     "current_wave": {
@@ -658,22 +657,22 @@
         "W1-0011",
         "W1-0012"
       ],
-      "created_ts": 1780853135.1865757,
+      "created_ts": 1783497595.867133,
       "status": "active"
     },
     "prepared_wave": null,
     "ko_slots": {},
     "logs": [
-      "[19:25:34] Neues Turnier gestartet.",
-      "[19:25:35] Welle 1 gestartet (12 Matches).",
-      "[19:25:35] Tisch 1: Team 23 vs Team 24 gestartet.",
-      "[19:25:35] Tisch 2: Team 21 vs Team 22 gestartet.",
-      "[19:25:35] Tisch 3: Team 19 vs Team 20 gestartet.",
-      "[19:25:35] Tisch 4: Team 17 vs Team 18 gestartet.",
-      "[19:25:35] Tisch 5: Team 15 vs Team 16 gestartet."
+      "[09:59:55] Neues Turnier gestartet.",
+      "[09:59:55] Welle 1 gestartet (12 Matches).",
+      "[09:59:55] Tisch 1: Team 23 vs Team 24 gestartet.",
+      "[09:59:55] Tisch 2: Team 21 vs Team 22 gestartet.",
+      "[09:59:55] Tisch 3: Team 19 vs Team 20 gestartet.",
+      "[09:59:55] Tisch 4: Team 17 vs Team 18 gestartet."
     ],
     "podium": [],
     "top4": [],
+    "table_5_enabled": false,
     "b_group": {
       "phase": "SETUP",
       "match_counter": 1,
@@ -681,7 +680,7 @@
       "matches": {},
       "podium": []
     },
-    "last_save_ts": 1780853135.187422,
+    "last_save_ts": 1783497595.868353,
     "last_save_label": "new_tournament",
     "autosave_count": 1
   }
