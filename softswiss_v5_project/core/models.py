@@ -336,6 +336,7 @@ class TournamentState:
     logs: List[str] = field(default_factory=list)
     podium: List[int] = field(default_factory=list)
     top4: List[int] = field(default_factory=list)
+    table_5_enabled: bool = True
     b_group: BGroupState = field(default_factory=BGroupState)
     last_save_ts: float = 0.0
     last_save_label: str = ""
@@ -357,6 +358,7 @@ class TournamentState:
             "logs": list(self.logs),
             "podium": list(self.podium),
             "top4": list(self.top4),
+            "table_5_enabled": self.table_5_enabled,
             "b_group": self.b_group.to_dict(),
             "last_save_ts": self.last_save_ts,
             "last_save_label": self.last_save_label,
@@ -380,6 +382,7 @@ class TournamentState:
         state.logs = [str(x) for x in data.get("logs", [])]
         state.podium = [int(x) for x in data.get("podium", [])]
         state.top4 = [int(x) for x in data.get("top4", [])]
+        state.table_5_enabled = bool(data.get("table_5_enabled", True))
         state.b_group = BGroupState.from_dict(data["b_group"]) if data.get("b_group") else BGroupState()
         state.last_save_ts = float(data.get("last_save_ts", 0.0))
         state.last_save_label = str(data.get("last_save_label", ""))

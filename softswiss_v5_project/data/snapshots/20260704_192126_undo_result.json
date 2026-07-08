@@ -1,15 +1,15 @@
 {
-  "saved_at": "2026-05-14T17:38:54",
-  "label": "new_tournament",
+  "saved_at": "2026-07-04T19:21:26",
+  "label": "undo_result",
   "state": {
     "phase": "SWISS",
-    "started_at": 1778773134.2517216,
+    "started_at": 1783185420.9585252,
     "match_counter": 13,
     "wave_index": 1,
     "teams": [
       {
         "id": 1,
-        "name": "Klatzköpfe",
+        "name": "Montafon 1",
         "seed": 1,
         "swiss_points": 0,
         "cups_metric": 0,
@@ -21,7 +21,7 @@
       },
       {
         "id": 2,
-        "name": "Dora & Boots",
+        "name": "Montafon 2",
         "seed": 2,
         "swiss_points": 0,
         "cups_metric": 0,
@@ -33,7 +33,7 @@
       },
       {
         "id": 3,
-        "name": "Fc Suff",
+        "name": "Grußige Cowboys",
         "seed": 3,
         "swiss_points": 0,
         "cups_metric": 0,
@@ -45,7 +45,7 @@
       },
       {
         "id": 4,
-        "name": "Daniel und Maggi",
+        "name": "Pongstar",
         "seed": 4,
         "swiss_points": 0,
         "cups_metric": 0,
@@ -69,7 +69,7 @@
       },
       {
         "id": 6,
-        "name": "Bob der Baumeister",
+        "name": "69 Elite",
         "seed": 6,
         "swiss_points": 0,
         "cups_metric": 0,
@@ -81,7 +81,7 @@
       },
       {
         "id": 7,
-        "name": "Die Becherflüsterer",
+        "name": "Die Becher Brüder",
         "seed": 7,
         "swiss_points": 0,
         "cups_metric": 0,
@@ -93,7 +93,7 @@
       },
       {
         "id": 8,
-        "name": "INSTANBUL CHAYAS",
+        "name": "Dynamo Dosenbier",
         "seed": 8,
         "swiss_points": 0,
         "cups_metric": 0,
@@ -105,7 +105,7 @@
       },
       {
         "id": 9,
-        "name": "Becher TÜV",
+        "name": "Bikini Bottom",
         "seed": 9,
         "swiss_points": 0,
         "cups_metric": 0,
@@ -117,7 +117,7 @@
       },
       {
         "id": 10,
-        "name": "300g Hamsterhack",
+        "name": "Dildo Fight Club",
         "seed": 10,
         "swiss_points": 0,
         "cups_metric": 0,
@@ -129,7 +129,7 @@
       },
       {
         "id": 11,
-        "name": "TEAM 51",
+        "name": "Die Geheimratsecken",
         "seed": 11,
         "swiss_points": 0,
         "cups_metric": 0,
@@ -141,7 +141,7 @@
       },
       {
         "id": 12,
-        "name": "Dildo Fight Club",
+        "name": "Radler Ohne Radler",
         "seed": 12,
         "swiss_points": 0,
         "cups_metric": 0,
@@ -153,7 +153,7 @@
       },
       {
         "id": 13,
-        "name": "Notnagel",
+        "name": "Promille Athleten",
         "seed": 13,
         "swiss_points": 0,
         "cups_metric": 0,
@@ -165,7 +165,7 @@
       },
       {
         "id": 14,
-        "name": "Doktor Michi",
+        "name": "Team 51",
         "seed": 14,
         "swiss_points": 0,
         "cups_metric": 0,
@@ -177,7 +177,7 @@
       },
       {
         "id": 15,
-        "name": "Grußige Cowboys",
+        "name": "Becher TÜV",
         "seed": 15,
         "swiss_points": 0,
         "cups_metric": 0,
@@ -189,7 +189,7 @@
       },
       {
         "id": 16,
-        "name": "Halda",
+        "name": "Verteidiger des Titels",
         "seed": 16,
         "swiss_points": 0,
         "cups_metric": 0,
@@ -201,7 +201,7 @@
       },
       {
         "id": 17,
-        "name": "Apex",
+        "name": "Instanbul Chayas",
         "seed": 17,
         "swiss_points": 0,
         "cups_metric": 0,
@@ -213,7 +213,7 @@
       },
       {
         "id": 18,
-        "name": "69 Elite",
+        "name": "Bob der Baumeister",
         "seed": 18,
         "swiss_points": 0,
         "cups_metric": 0,
@@ -225,7 +225,7 @@
       },
       {
         "id": 19,
-        "name": "Mario und Luigi",
+        "name": "Team Kraftfuatter",
         "seed": 19,
         "swiss_points": 0,
         "cups_metric": 0,
@@ -237,7 +237,7 @@
       },
       {
         "id": 20,
-        "name": "Promille Athleten",
+        "name": "300g Hamsterhack",
         "seed": 20,
         "swiss_points": 0,
         "cups_metric": 0,
@@ -249,7 +249,7 @@
       },
       {
         "id": 21,
-        "name": "Die Becher Brüder",
+        "name": "Dora & Boots",
         "seed": 21,
         "swiss_points": 0,
         "cups_metric": 0,
@@ -261,7 +261,7 @@
       },
       {
         "id": 22,
-        "name": "Motafon 1",
+        "name": "FC Bailando",
         "seed": 22,
         "swiss_points": 0,
         "cups_metric": 0,
@@ -273,7 +273,7 @@
       },
       {
         "id": 23,
-        "name": "Montafon 2",
+        "name": "Kobeer Bryant & Lepong James",
         "seed": 23,
         "swiss_points": 0,
         "cups_metric": 0,
@@ -285,7 +285,7 @@
       },
       {
         "id": 24,
-        "name": "Bauer Beni",
+        "name": "Die Becherflüsterer",
         "seed": 24,
         "swiss_points": 0,
         "cups_metric": 0,
@@ -310,7 +310,7 @@
         "loser": null,
         "is_overtime": false,
         "loser_cups_hit": null,
-        "started_ts": 1778773134.5844257,
+        "started_ts": 1783185421.282034,
         "ended_ts": null,
         "point_cap_used": 2,
         "game_cap_used": 1,
@@ -338,7 +338,7 @@
         "loser": null,
         "is_overtime": false,
         "loser_cups_hit": null,
-        "started_ts": 1778773134.5845027,
+        "started_ts": 1783185421.282107,
         "ended_ts": null,
         "point_cap_used": 2,
         "game_cap_used": 1,
@@ -366,7 +366,7 @@
         "loser": null,
         "is_overtime": false,
         "loser_cups_hit": null,
-        "started_ts": 1778773134.5845687,
+        "started_ts": 1783185421.2821712,
         "ended_ts": null,
         "point_cap_used": 2,
         "game_cap_used": 1,
@@ -394,7 +394,7 @@
         "loser": null,
         "is_overtime": false,
         "loser_cups_hit": null,
-        "started_ts": 1778773134.5846267,
+        "started_ts": 1783185421.2822285,
         "ended_ts": null,
         "point_cap_used": 2,
         "game_cap_used": 1,
@@ -422,7 +422,7 @@
         "loser": null,
         "is_overtime": false,
         "loser_cups_hit": null,
-        "started_ts": 1778773134.5847118,
+        "started_ts": 1783185421.282284,
         "ended_ts": null,
         "point_cap_used": 2,
         "game_cap_used": 1,
@@ -658,19 +658,22 @@
         "W1-0011",
         "W1-0012"
       ],
-      "created_ts": 1778773134.5839102,
+      "created_ts": 1783185421.2818604,
       "status": "active"
     },
     "prepared_wave": null,
     "ko_slots": {},
     "logs": [
-      "[17:38:54] Neues Turnier gestartet.",
-      "[17:38:54] Welle 1 gestartet (12 Matches).",
-      "[17:38:54] Tisch 1: Montafon 2 vs Bauer Beni gestartet.",
-      "[17:38:54] Tisch 2: Die Becher Brüder vs Motafon 1 gestartet.",
-      "[17:38:54] Tisch 3: Mario und Luigi vs Promille Athleten gestartet.",
-      "[17:38:54] Tisch 4: Apex vs 69 Elite gestartet.",
-      "[17:38:54] Tisch 5: Grußige Cowboys vs Halda gestartet."
+      "[19:17:00] Neues Turnier gestartet.",
+      "[19:17:01] Welle 1 gestartet (12 Matches).",
+      "[19:17:01] Tisch 1: Kobeer Bryant & Lepong James vs Die Becherflüsterer gestartet.",
+      "[19:17:01] Tisch 2: Dora & Boots vs FC Bailando gestartet.",
+      "[19:17:01] Tisch 3: Team Kraftfuatter vs 300g Hamsterhack gestartet.",
+      "[19:17:01] Tisch 4: Instanbul Chayas vs Bob der Baumeister gestartet.",
+      "[19:17:01] Tisch 5: Becher TÜV vs Verteidiger des Titels gestartet.",
+      "[19:19:36] Tisch 2: Dora & Boots gewinnt gegen FC Bailando (3:0 Punkte, Cups +2/-2).",
+      "[19:19:36] Tisch 2: Promille Athleten vs Team 51 gestartet.",
+      "[19:21:26] Letzte Eingabe zurueckgenommen: W01-02."
     ],
     "podium": [],
     "top4": [],
@@ -681,8 +684,8 @@
       "matches": {},
       "podium": []
     },
-    "last_save_ts": 1778773134.584785,
-    "last_save_label": "new_tournament",
-    "autosave_count": 1
+    "last_save_ts": 1783185686.956136,
+    "last_save_label": "undo_result",
+    "autosave_count": 3
   }
 }

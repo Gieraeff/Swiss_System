@@ -92,6 +92,8 @@ class SwissTournamentEngine:
         )
 
     def _swiss_can_use_table_5(self) -> bool:
+        if not self.state.table_5_enabled:
+            return False
         if self._b_group_blocks_table_5_for_swiss():
             return False
         if self.state.phase != "SWISS":
@@ -109,6 +111,19 @@ class SwissTournamentEngine:
         if TABLE_COUNT >= B_GROUP_TABLE_NUMBER and self._swiss_can_use_table_5():
             tables.append(B_GROUP_TABLE_NUMBER)
         return tables
+
+    def set_table_5_enabled(self, enabled: bool) -> None:
+        enabled = bool(enabled)
+        if self.state.table_5_enabled == enabled:
+            return
+        self.state.table_5_enabled = enabled
+        if enabled:
+            self.log(f"{B_GROUP_TABLE_LABEL}: fuer das Hauptturnier aktiviert.")
+        elif B_GROUP_TABLE_NUMBER in self.state.active_tables:
+            self.log(f"{B_GROUP_TABLE_LABEL}: nach dem laufenden Hauptturnier-Match deaktiviert.")
+        else:
+            self.log(f"{B_GROUP_TABLE_LABEL}: fuer das Hauptturnier deaktiviert.")
+        self._notify_change()
 
     def free_tables(self) -> List[int]:
         used = self._used_table_numbers()
@@ -849,8 +864,10 @@ class SwissTournamentEngine:
             raise ValueError(f"Es müssen genau {TEAM_COUNT} Teamnamen eingegeben werden.")
 
         b_group = self.state.b_group
+        table_5_enabled = self.state.table_5_enabled
         self.reset()
         self.state.b_group = b_group
+        self.state.table_5_enabled = table_5_enabled
         self.state.started_at = self.now()
         self.state.phase = "SWISS"
         self.state.wave_index = 1

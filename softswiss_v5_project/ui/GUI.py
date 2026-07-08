@@ -5,12 +5,13 @@ import json
 import tkinter as tk
 import ctypes
 from ctypes import wintypes
-from tkinter import messagebox, ttk
+from pathlib import Path
+from tkinter import filedialog, messagebox, ttk
 from turtle import right
 from typing import List, Optional
 
 from core.backup import BackupManager
-from core.config import APP_TITLE, B_GROUP_TABLE_LABEL, B_GROUP_TEAM_COUNT, PUBLIC_THEME, SWISS_GAMES_PER_TEAM, TEAM_COUNT, TOP_CUT
+from core.config import APP_TITLE, B_GROUP_TABLE_LABEL, B_GROUP_TABLE_NUMBER, B_GROUP_TEAM_COUNT, PUBLIC_THEME, SWISS_GAMES_PER_TEAM, TEAM_COUNT, TOP_CUT
 from core.models import TournamentState
 from core.Swiss import SwissTournamentEngine
 
@@ -42,11 +43,13 @@ class TournamentGUI:
         self.selected_winner_var = tk.StringVar()
         self.loser_cups_var = tk.StringVar(value="0")
         self.ot_var = tk.BooleanVar(value=False)
+        self.table_5_enabled_var = tk.BooleanVar(value=self.engine.state.table_5_enabled)
         self.ko_button: Optional[ttk.Button] = None
         self.undo_button: Optional[ttk.Button] = None
         self.edit_button: Optional[ttk.Button] = None
         self.reset_match_button: Optional[ttk.Button] = None
         self.fill_button: Optional[ttk.Button] = None
+        self.table_5_check: Optional[tk.Checkbutton] = None
         self.save_now_button: Optional[ttk.Button] = None
         self.recompute_button: Optional[ttk.Button] = None
         self.b_group_team_text: Optional[tk.Text] = None
@@ -435,6 +438,20 @@ class TournamentGUI:
         ttk.Label(actions, text="Betrieb", style="CardTitle.TLabel").pack(anchor="w")
         self.fill_button = ttk.Button(actions, text="Freie Plätze auffüllen", command=self.fill_tables_normal)
         self.fill_button.pack(fill="x", pady=(6, 6))
+        self.table_5_check = tk.Checkbutton(
+            actions,
+            text="Tisch 5 im Hauptturnier nutzen",
+            variable=self.table_5_enabled_var,
+            command=self.toggle_table_5_from_gui,
+            bg=PUBLIC_THEME["card"],
+            fg=PUBLIC_THEME["text"],
+            activebackground=PUBLIC_THEME["card"],
+            activeforeground=PUBLIC_THEME["text"],
+            selectcolor=PUBLIC_THEME["card"],
+            font=("Segoe UI", 10),
+            anchor="w",
+        )
+        self.table_5_check.pack(fill="x", pady=(0, 6))
         self.save_now_button = ttk.Button(actions, text="Jetzt speichern", command=self.save_now_from_gui)
         self.save_now_button.pack(fill="x", pady=(0, 6))
         self.recompute_button = ttk.Button(actions, text="Nächste Welle neu berechnen", command=self.recompute_pairing_from_gui)
@@ -695,6 +712,7 @@ class TournamentGUI:
         self.phase_var.set(self.engine.phase_label())
         self.progress_var.set(self.engine.progress_text())
         self.save_var.set(self._format_save_info())
+        self._refresh_table_5_toggle()
         self._refresh_table_combo()
         self._refresh_winner_combo()
         self._refresh_wave_tree()
@@ -807,6 +825,9 @@ class TournamentGUI:
         )
         if self.ko_button is not None:
             self._set_button_enabled(self.ko_button, can_start_ko)
+
+    def _refresh_table_5_toggle(self) -> None:
+        self.table_5_enabled_var.set(self.engine.state.table_5_enabled)
 
     def _refresh_prepared_wave_tree(self) -> None:
         for item in self.prepared_wave_tree.get_children():
@@ -1539,12 +1560,20 @@ class TournamentGUI:
             messagebox.showerror("Fehler", str(exc))
 
     def load_autosave(self) -> None:
-        if not self.backup_manager.autosave_exists():
-            messagebox.showinfo("Autosave", "Kein Autosave gefunden.")
+        latest_snapshot = self.backup_manager.latest_snapshot()
+        initial_dir = self.backup_manager.snapshot_dir if latest_snapshot else self.backup_manager.autosave_file.parent
+        selected = filedialog.askopenfilename(
+            parent=self.root,
+            title="Autosave oder Snapshot laden",
+            initialdir=str(initial_dir),
+            filetypes=[("Backup JSON", "*.json"), ("Alle Dateien", "*.*")],
+        )
+        if not selected:
             return
         try:
-            self.engine.state = self.backup_manager.load_state()
-            self.status_var.set("Autosave geladen.")
+            path = Path(selected)
+            self.engine.state = self.backup_manager.load_state(path)
+            self.status_var.set(f"Backup geladen: {path.name}")
             self.refresh_all()
         except Exception as exc:
             messagebox.showerror("Ladefehler", str(exc))
@@ -1834,6 +1863,22 @@ class TournamentGUI:
         self.persist_state(label="fill_relaxed", snapshot=True)
         self.status_var.set(f"Erweiterte Suche: {count} Match(es) gestartet.")
         self.refresh_all()
+
+    def toggle_table_5_from_gui(self) -> None:
+        enabled = self.table_5_enabled_var.get()
+        try:
+            self.engine.set_table_5_enabled(enabled)
+            self.persist_state(label="table_5_enabled" if enabled else "table_5_disabled", snapshot=False)
+            if enabled:
+                self.status_var.set("Tisch 5 im Hauptturnier aktiviert.")
+            elif B_GROUP_TABLE_NUMBER in self.engine.state.active_tables:
+                self.status_var.set("Tisch 5 wird nach dem laufenden Hauptturnier-Match nicht neu belegt.")
+            else:
+                self.status_var.set("Tisch 5 im Hauptturnier deaktiviert. B-Gruppe bleibt moeglich.")
+            self.refresh_all(force=True)
+        except Exception as exc:
+            self.table_5_enabled_var.set(self.engine.state.table_5_enabled)
+            messagebox.showerror("Tisch 5", str(exc))
 
     def on_table_selected(self, _event: object = None) -> None:
         self._refresh_winner_combo()
